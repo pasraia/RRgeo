@@ -1,0 +1,24 @@
+---
+title: "Introduction to RRgeo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Intro}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+  %\VignetteEncoding{UTF-8}
+
+---
+
+```{r}
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+
+`RRgeo` provides functions for modeling the geographic distribution of extremely rare species and determining the area of their origin and the history of their past contacts.
+The package encompasses *ENphylo*, a recently developed Species Distribution Model (SDM) which couples Environmental Niche Factor Analysis (ENFA) and phylogenetic imputation. *ENphylo* first calculates the marginality and specialization values for all species with abundant occurrence record. For rare species, these values are estimated through phylogenetic imputation. Marginality and specialization are converted into habitat suitability values allowing for spatially explicit model predictions (Mondanaro et al. 2023).
+In this vignette, we demonstrate how to format and process occurrence data to run *ENphylo* by using 15 Late Pleistocene mammal species as a case study. We also introduce an R function for downloading and manipulating the mammal occurrences and the paleoclimatic/vegetational data published in the EutherianCop database (Mondanaro et al. 2025). EutherianCop includes a comprehensive global dataset of mammal occurrences and past climatic/vegetational conditions covering the last 130 ka (Mondanaro et al. 2025).
+For a full list of references please run:
+
+```{r}
+citation("RRgeo")
+```
+

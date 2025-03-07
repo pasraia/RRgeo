@@ -1,0 +1,106 @@
+#' @importFrom terra ncol nrow crs global ncell xyFromCell
+#' @importFrom ks hpi Hscv.diag kde
+#' @importFrom sf st_geometry_type
+sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardize = FALSE,
+                  scale.factor = NULL, mask = FALSE)
+{
+  if (missing(x))
+    stop("x argument must be provided")
+  ref.flag = inherits(ref, "SpatRaster")
+  if (!inherits(x, c("sf", "sfc")))
+    stop(deparse(substitute(x)), " must be a sf, or sfc object")
+  if (unique(as.character(st_geometry_type(x))) != "POINT")
+    stop(deparse(substitute(x)), " must be single-part POINT geometry")
+  if (is.null(ref)) {
+    if (!is.null(res)) {
+      ref <- rast(ext(x), resolution = res)
+    }
+    else {
+      ref <- rast(ext(x))
+      message("defaulting to ", res(ref)[1], "x",
+              res(ref)[2], " cell resolution")
+    }
+  }
+  if (inherits(ref, "numeric")) {
+    if (length(ref) != 4)
+      stop("Need xmin, xmax, ymin, ymax bounding coordinates")
+    if (!is.null(res)) {
+      ref <- rast(ext(ref), resolution = res)
+    }
+    else {
+      ref <- rast(ext(ref))
+      message("defaulting to ", res(ref)[1], "x",
+              res(ref)[2], " cell resolution")
+    }
+  }
+  else {
+    if (!inherits(ref, "SpatRaster"))
+      stop(deparse(substitute(ref)), " must be a terra SpatRast object")
+  }
+  n <- c(nrow(ref), ncol(ref))
+  if (is.null(bw)) {
+    if (is.null(y)) {
+
+      if(inherits(try(suppressWarnings(hpi(st_coordinates(x)[,1:2])),
+                      silent=TRUE),"try-error")){
+        bw<-res(ref)[1]
+        message("Using specified bandwidth: ")
+
+      } else {
+        bw = suppressWarnings(hpi(st_coordinates(x)[,
+                                                            1:2]))
+        message("Unweighted automatic bandwidth: ")
+
+      }
+
+    }
+    else {
+
+      if(inherits(try(suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,1:2], y))),
+                      silent=TRUE),"try-error")){
+        bw<-res(ref)[1]
+        message("Using specified bandwidth: ")
+
+      } else {
+        bw = suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,1:2], y)))
+        message("Weighted automatic CV bandwidth: ")
+
+      }
+
+    }
+  }
+  else {
+    message("Using specified bandwidth: ")
+
+  }
+  if (!is.null(y)) {
+    message("\n", "calculating weighted kde", "\n")
+    kde.est <- suppressWarnings(rast(matrix(kde(st_coordinates(x)[,
+                                                                                 1:2], h = bw, eval.points = xyFromCell(ref,
+                                                                                                                               1:ncell(ref)), gridsize = n, w = y, density = TRUE)$estimate,
+                                                   nrow = n[1], ncol = n[2], byrow = TRUE), extent = ext(ref)))
+  }
+  else {
+    message("\n", "calculating unweighted kde", "\n")
+    kde.est <- suppressWarnings(rast(matrix(kde(st_coordinates(x)[,
+                                                                                 1:2], h = bw, eval.points = xyFromCell(ref,
+                                                                                                                               1:ncell(ref)), gridsize = n, density = TRUE)$estimate,
+                                                   nrow = n[1], ncol = n[2], byrow = TRUE), extent = ext(ref)))
+  }
+  if (!is.null(scale.factor))
+    kde.est <- kde.est * scale.factor
+  if (standardize == TRUE) {
+    kde.est <- kde.est/global(kde.est, "max", na.rm = TRUE)[,
+                                                                   1]
+  }
+  if (mask) {
+    if (!ref.flag) {
+      message("Since a raster was not used as ref, there is nothing to mask")
+    }
+    else {
+      kde.est <- mask(kde.est, ref)
+    }
+  }
+  terra::crs(kde.est) <- crs(x)
+  return(kde.est)
+}

@@ -1,0 +1,100 @@
+bibentry(bibtype        = "Article",
+         header       = "ENphylo method",
+         title        = "ENphylo: A new method to model the distribution of extremely rare species.",
+         author       = c(
+           person("Alessandro Mondanaro"),
+           person("Mirko Di Febbraro"),
+           person("Silvia Castiglione"),
+           person("Marina Melchionna"),
+           person("Carmela Serio"),
+           person("Giorgia Girardi"),
+           person("Arianna Morena Belfiore"),
+           person("Pasquale Raia")),
+         journal      = "Methods in Ecology and Evolution",
+         year         = "2023",
+         volume       = "14",
+         pages        = "911-922",
+         doi          = "10.1111/2041-210X.14066",
+         textVersion  = paste("Mondanaro, A., Di Febbraro, M., Castiglione, S., Melchionna, M., Serio, C., Girardi, G., Blefiore, A.M., & Raia, P. (2023).",
+                              "ENphylo: A new method to model the distribution of extremely rare species.",
+                              "Methods in Ecology and Evolution, 14: 911-922.",
+                              "doi:10.1111/2041-210X.14066")
+)
+
+
+bibentry(bibtype        = "Article",
+         header       = "ENphylo application on extremely rare species",
+         title        = "Modelling reveals the effect of climate and land use change on Madagascar’s chameleons fauna.",
+         author       = c(
+           person("Alessandro Mondanaro"),
+           person("Mirko Di Febbraro"),
+           person("Silvia Castiglione"),
+           person("Arianna Morena Belfiore"),
+           person("Giorgia Girardi"),
+           person("Marina Melchionna"),
+           person("Carmela Serio"),
+           person("Antonella Esposito"),
+           person("Pasquale Raia")),
+         journal      = "Communications Biology",
+         year         = "2024",
+         volume       = "7",
+         pages        = "889",
+         doi          = "10.1038/s42003-024-06597-5",
+         textVersion  = paste("Mondanaro, A., Di Febbraro, M., Castiglione, S., Belfiore, A. M., Girardi, G., Melchionna, M., Serio, C., Esposito, A., & Raia, P. (2024).",
+                              "Modelling reveals the effect of climate and land use change on Madagascar’s chameleons fauna.",
+                              "Communications Biology, 7: 889.",
+                              "doi:10.1038/s42003-024-06597-5")
+)
+
+
+
+bibentry(bibtype        = "Article",
+         header       = "EutherianCoP Database",
+         title        = "ENphylo: A new method to model the distribution of extremely rare species",
+         author       = c(
+           person("Alessandro Mondanaro"),
+           person("Giorgia Girardi"),
+           person("Silvia Castiglione"),
+           person("Axel Timmermann"),
+           person("Elke Zeller"),
+           person("Thushara Venugopal"),
+           person("Carmela Serio"),
+           person("Marina Melchionna"),
+           person("Antonella Esposito"),
+           person("Mirko Di Febbraro"),
+           person("Pasquale Raia")),
+         journal      = "Scientific Data",
+         year         = "2025",
+         volume       = "12",
+         pages        = "6",
+         doi          = "10.1038/s41597-024-04181-4",
+         textVersion  = paste("Mondanaro, A., Girardi, G., Castiglione, S., Timmermann, A., Zeller, E., Venugopal, T., Serio, C., Melchionna, M., Esposito, A., Di Febbraro, M., & Raia, P. (2025).",
+                              "EutherianCoP. An integrated biotic and climate database for conservation paleobiology based on eutherian mammals.",
+                              "Scientific Data, 12: 6.",
+                              "doi:10.1038/s41597-024-04181-4")
+)
+
+
+bibentry(bibtype        = "Article",
+         header       = "RRphylogeography method",
+         title        = "RRphylogeography: A new method to find the area of origin of species and the history of past contacts between species.",
+         author       = c(
+           person("Alessandro Mondanaro"),
+           person("Silvia Castiglione"),
+           person("Mirko Di Febbraro"),
+           person("Axel Timmermann"),
+           person("Giorgia Girardi"),
+           person("Marina Melchionna"),
+           person("Carmela Serio"),
+           person("Arianna Morena Blefiore"),
+           person("Pasquale Raia")),
+         journal      = "Methods in Ecology and Evolution",
+         year         = "2025",
+         volume       = "16",
+         pages        = "546-557",
+         doi          = "10.1111/2041-210X.14478",
+         textVersion  = paste("Mondanaro, A., Castiglione, S., Di Febbraro, M., Timmermann, A., Girardi, G., Melchionna, M., Serio, C., Belfiore, A.M., & Raia, P. (2025).",
+                              "RRphylogeography: A new method to find the area of origin of species and the history of past contacts between species.",
+                              "Methods in Ecology and Evolution",
+                              "doi: 10.1111/2041-210X.14478")
+)

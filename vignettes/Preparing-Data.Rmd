@@ -1,0 +1,240 @@
+---
+title: "1. Preparing the data: eucop_data_preparation"
+author: "Alessandro Mondanaro, Silvia Castiglione, Pasquale Raia"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Preparing-Data}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+  %\VignetteEncoding{UTF-8}
+
+---
+
+```{r include = FALSE}
+if (!requireNamespace("rmarkdown", quietly = TRUE) ||
+     !rmarkdown::pandoc_available()) {
+   warning(call. = FALSE, "Pandoc not found, the vignettes is not built")
+   knitr::knit_exit()
+}
+
+misspacks<-sapply(c("rnaturalearth","ggplot2","viridis","ggtext"),requireNamespace,quietly=TRUE)
+if(any(!misspacks)){
+  warning(call. = FALSE,paste(names(misspacks)[which(!misspacks)],collapse=", "), "not found, the vignettes is not built")
+   knitr::knit_exit()
+}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning=FALSE,
+  message=FALSE,
+  out.width='95%',
+  fig.align='center',
+  fig.width=6,
+  fig.height=4,
+  dpi=300,
+  fig.pos='h'
+)
+
+require(RRgeo)
+require(rnaturalearth)
+require(ggplot2)
+require(terra)
+require(sf)
+require(viridis)
+require(ggtext)
+options(rmarkdown.html_vignette.check_title = FALSE)
+load(file.path(dirname(getwd()),"inst","exdata","Ursus_occs.Rda"))
+load(file.path(dirname(getwd()),"inst","exdata","outputs.Rda"))
+rast(file.path(dirname(getwd()),"inst","exdata","X35kya.tif"))->map35
+map35[[1]]->map
+```
+
+<style>
+    img {
+        border: 0;
+    }
+</style>
+
+## Index
+1. [Introduction](#intro)
+2. [Background area definition](#bgarea)
+3. [`eucop_data_preparation` on *Ursus spelaeus*  walkthrough](#spel)
+    a. [Load the occurrence of the target species](#loadocc)
+    b. [Minimum Convex Polygon and buffer area creation](#mcp)
+    a. [Absence points](#absence)
+3. [eucop_data_preparation outputs](#output)
+
+
+## 1. Introduction {#intro}
+The `eucop_data_preparation` function is meant to automatically import and preprocess fossil mammal occurrences and paleoclimatic/vegetational data available from the EutherianCop database (Mondanaro et al., 2025). Users can customize the entire procedure by focusing on single or multiple species using the `species_name` argument. Similarly, it is possible to select a single paleoclimate model simulation (choosing between CESM1.2 and biome4, see https://climatedata.ibs.re.kr/) and choose which variables to use by setting the `variables` and `which.vars` arguments, respectively. 
+
+The following arguments describe all the functionalities implemented in `eucop_data_preparation`:
+
+* `calibration`: calibrate the conventional radiocarbon age estimates.
+* `add.modern.occs`: add the modern record to the fossil record of target species.
+* `combine.ages`: compute the mean/median for all dates available for an individual site/layer.
+* `remove.duplicates`: remove multiple records in individual grid cells.
+* `bk_points`: add background/pseudoabsence points (i.e. absences) by following the approaches described in Mondanaro et al. (2021, 2024). Details on these different procedures are provided in the next section.
+
+## 2. Background area definition {#bgarea}
+Since Species Distibution Models (SDMs) work by comparing the distribution of the focal species with the multidimensional space of environmental variables, it is crucial to define a backgroud area, the geographic space where the species could potentially be found given its dispersal limitations, historical factors, and ecological barriers (Barve et al., 2011). Different SDMs use different algorithms to estimate where species are likely to occur. ENFA is a presence-only method which compares the environmental conditions at presence locations to those associated to the entire background area (Hirzel et al., 2002). Unlike ENFA, presence-pseudoabsence models commonly works by sampling the pseudoabsences points from the background area in addition to presence data (Elith & Leathwick, 2009). In the following sections, we will described both presence-only and presence-pseudoabsence approaches replicating the procedures described in Mondanaro et al. (2021, 2024) by using the extinct cave bear *Ursus spelaeus* as case study. 
+
+## 3. `eucop_data_preparation` on *Ursus spelaeus*  walkthrough {#spel}
+
+`eucop_data_preparation` allows users to format raw occurrences according to the preferred strategy. In the following lines, we show how `eucop_data_preparation` automatically imports the EutherianCop occurrences, defines the backgorund area, and creates the absence points to model the spatial distribution of the target species.
+
+### a. Load the occurrence of the target species {#loadocc}
+First, cave bear occurrences are converted into spatial features object. The spatial extent is reduced to mainland Europe (up to 50° longitude). Four bioclimatic variables ("bio1,"bio4","bio11","bio19") are selected as predictors. This is accomplished by running `eucop_data_preparation` by setting `species_name = Ursus spelaeus`, `variables = "bio"`, and `which.vars = c("bio1,"bio4","bio11","bio19")`. Given the importance of using an equal-area projection for accurate area-based calculations, `eucop_data_preparation` internally reprojects raw data to the Mollweide World projection. The use of the Mollweide rather than other projection systems is due to its suitability for global-scale applications. 
+
+```{r loadoccs1, eval=FALSE}
+library(RRgeo)
+library(terra)
+library(sf)
+library(rnaturalearth)
+library(ggplot2)
+library(ggtext)
+library(viridis)
+
+
+load(system.file("exdata/Ursus_occs.Rda", package="RRgeo"))
+```
+```{r  loadoccs2}
+ne_countries()->globalmap
+subset(globalmap,continent=="Europe")->euromap
+sf_use_s2(FALSE)
+st_crop(euromap, xmin=-20, ymin=2 , xmax=50, ymax=75)->euromap
+st_crop(occs, xmin=-20, ymin=2 , xmax=50, ymax=75)->occs
+st_transform(euromap, st_crs("ESRI:54009"))->euromap
+st_transform(occs, st_crs("ESRI:54009"))->occs
+
+p1<-ggplot()+
+  geom_sf(data=euromap,col="grey40",fill="white")+
+  geom_sf(data=occs,fill="darkorchid2",size=2.5,color="black",pch=21)+
+  labs(title="*Ursus spelaeus* occurrences")+
+  theme(panel.background = element_rect(fill="aliceblue",colour = "black"),
+        panel.grid = element_blank(),
+        axis.text=element_text(size=10),
+        plot.title = element_markdown(size=12,hjust=0.5),
+        plot.margin = unit(c(0.1,0.1,0.1,0.1),"cm"))
+
+plot(p1)
+
+```
+
+### b. Minimum Convex Polygon and buffer area creation {#mcp}
+Next, `eucop_data_preparation` calculates the Minimum Convex Polygon (MCP) which encloses all the fossil localities where *U. spelaeus* was present. Then, to account for species’ dispersal abilities and overcome potential bias in the record preservation, it creates a buffer area around the polygon with a radius equal to 10\% of the maximum distance between the occurrences of *U. spelaeus*. The 10\% value is set by default and can be changed by setting the argument \code{buff} in the \code{bk_points} list.
+
+```{r mcp,out.width='47%',fig.width=4,fig.height=4,dpi=300,fig.show='hold',fig.align='default'}
+buff<-0.1 # this is the element "buff" within the argument `bk_points`
+sf::st_convex_hull(st_union(occs))->pol
+max(st_distance(occs))*buff->buf 
+st_buffer(pol,dist=as.numeric(buf))->pol_with_buffer
+
+p2<-p1+
+  geom_sf(data=pol,col="forestgreen",fill="transparent",lwd=1)+
+  labs(title="*Ursus spelaeus* occurrences and MCP")+
+  theme(panel.background = element_rect(fill="aliceblue",colour = "black"),
+        panel.grid = element_blank(),
+        axis.text= element_text(size=10),
+        plot.title = element_markdown(size=12,hjust=0.5),
+        plot.margin = unit(c(0.1,0.1,0.1,0.1),"cm"))
+p3<-p1+
+  geom_sf(data=pol,col="forestgreen",fill="transparent",lwd=1,linetype="dashed")+
+  geom_sf(data=pol_with_buffer,col="forestgreen",fill="transparent",lwd=1)+
+  labs(title="*Ursus spelaeus* occurrences and <br> MCP with buffer area")+
+  theme(panel.background = element_rect(fill="aliceblue",colour = "black"),
+        panel.grid = element_blank(),
+        axis.text= element_text(size=10),
+        plot.title = element_markdown(size=12,hjust=0.5),
+        plot.margin = unit(c(0.1,0.1,0.1,0.1),"cm"))
+
+plot(p2)
+plot(p3)
+```
+
+### c. Absence points {#absence}
+Once the background area is defined, all the paleoclimatic/vegetational variables selected by the user are cropped accordingly. Then, the selection of absence points depends on the chosen strategy. 
+
+Under the "background" approach (ENFA - presence-only), the values associated to each grid cell included in the background area represent the multidimensional space of variables. This is accomplished by setting `bk_points = list(buff = 0.1, bk_strategy = "background", bk_n = 10000)`  where all values are defaults. Here, the `bk_n` argument defines the maximum number of absence points in each time bin.
+**Notice**: The inclusion of background points is repeated for each time bin where the target species occur as it is a necessary requirement for applying ENFA. Consequently, the output files might take up much disk space. However, this might be a problem only if a very long list of `species_name` is provided. In any case, we invite the users to ensure having sufficient available disk space on their device before running the analyses.
+
+
+Unlike ENFA, the "pseudoabsence" approach requires the selection of specific locations within the accessible area of the species, where absence points are to be sampled. To end it, `eucop_data_preparation` develops on the approach described in Mondanaro et al. (2021). It starts by generating a density map on all the occurrences of the target species (irrespective of the time bin), so that there are more pseudoabsences where the presences are denser. Then, for each time bin, it samples a number of pseudoabsences which is proportional to the number of presences in the bin itself, up to a maximum total number (i.e. summed over all time bins) defined by `bk_n`. This is accomplished by setting `bk_points = list(buff = 0.1, bk_strategy = "pseudoabsence", bk_n = 10000)`.
+In the chunk below, we used the map of a random "bio" variable at 35 kyr as a geographical mask to plot the density map, after converting it by using the extent and the coordinate raster system (crs) of the background area.
+
+
+```{r eval=FALSE}
+rast(system.file("exdata/X35kya.tif", package="RRgeo"))->map35
+map35[[1]]->map
+```
+```{r density}
+project(map,st_crs(pol_with_buffer)$proj4string,res = 50000)->map
+mask(crop(map,vect(pol_with_buffer)),vect(pol_with_buffer))->map
+RRgeo:::density_background(pres.locs=occs, MASK=map, rm.pres=TRUE)->dens.ras
+as.data.frame(dens.ras,xy=TRUE)->dens.probs
+
+p_dens<-ggplot()+
+  geom_sf(data=euromap)+
+  geom_tile(data=dens.probs,aes(x=x,y=y,fill=lyr.1))+
+  scale_fill_viridis()+
+  geom_sf(data=pol_with_buffer,col="forestgreen",fill="transparent",lwd=1)+
+  labs(title="*Ursus spelaeus* density map",
+       fill = "Probability")+
+  theme(panel.background = element_rect(fill="aliceblue",colour = "black"),
+        panel.grid = element_blank(),
+        axis.text= element_text(size=10),
+        axis.title = element_blank(),
+        plot.title = element_markdown(size=12,hjust=0.5),
+        plot.margin = unit(c(0.1,0.1,0.1,0.1),"cm"))
+plot(p_dens)
+```
+
+Example: we picked the 35 kyr time interval and a random "bio" variable to produce a toy example of what is described above. This time interval includes 7 occurrences of *U. spelaeus*. To calculate the density map, `eucop_data_preparation` uses an `RRgeo` internal function named `density_background`. Additionally, the function excludes the occupied cells from the density map (the blank cells in the figure) to prevent misleading conclusions about habitat suitability or the species' environmental preferences. After partitioning 10000 pseudoabsences over time, our sample of pseudoabsences for the 35 kyr time interval includes 386 datapoints.
+
+```{r loadpseudoabsence, eval=FALSE}
+load(file.path(dirname(getwd()),"inst","exdata","outputs.Rda"))
+```
+
+```{r pseudoabsence, echo=FALSE}
+ggplot()+
+  geom_sf(data=euromap,col="grey40",fill="white")+
+  geom_sf(data=psabs.points,aes(fill="pseudoabsence"),size=2.5,color="black",pch=21)+
+  geom_sf(data=pres.points,aes(fill="presence"),size=2.5,color="black",pch=21)+
+  scale_fill_manual(values=c("darkorchid2","gold2"))+
+  geom_sf(data=pol_with_buffer,col="forestgreen",fill="transparent",lwd=1)+
+  labs(title="*Ursus spelaeus* at 35 kya")+
+  theme(panel.background = element_rect(fill="aliceblue",colour = "black"),
+        panel.grid = element_blank(),
+        axis.text=element_text(size=10),
+        legend.title = element_blank(),
+        legend.key = element_rect(fill = "white", colour = "white"),
+        plot.title = element_markdown(size=12,hjust=0.5),
+        plot.margin = unit(c(0.1,0.1,0.1,0.1),"cm"))
+```
+
+
+## `eucop_data_preparation` outputs {#output}
+The outputs from `eucop_data_preparation` function depend on the combination of arguments chosen by users. Specifically, the name of output files include the suffix "cal/uncal" and "combined/multi" depending on whether calibration (argument `calibration`) and age aggregation (argument `combine.ages`) steps are enabled. The number and the names of columns in the output may vary accordingly.
+If both calibration and aggregation are disabled, the output file returns all original age estimates along with their uncertainties. Conversely, if both parameters are enabled, the output file contains a single column with calibrated average ages. If the `bk_points` argument is enabled, the ages of presence and absence points are forced to 1 kyr resolution according with the temporal resolution of the paleoclimatic/vegetational data. 
+In any case, `eucop_data_preparation` stores a geopackage file (one for each target species) in the file path specified by the `output.dir` argument. In addition to the information about ages, the output files further contain a column called "OBS" to include the vector of species occurrence data in binary format, the spatial geometry, and all the data information derived from EutherianCop dataset.
+
+```{r eucop, eval=FALSE}
+species_vec<-c( "Canis latrans","Canis lupus","Gulo gulo","Lutra lutra",
+                "Martes americana","Meles meles","Mustela erminea",
+                "Mustela nivalis","Procyon lotor","Ursus arctos","Ursus ingressus",
+                "Ursus maritimus","Ursus spelaeus","Vulpes velox","Vulpes vulpes" )
+
+setwd("YOUR_DIRECTORY")
+eucop_data_preparation(input.dir=getwd(), species_name=species_vec, variables="bio",
+                       calibration=TRUE, combine.ages="mean", bk_points=list(),
+                       output.dir=getwd())
+```
+
+## References
+* Mondanaro, A., Girardi, G., Castiglione, S., Timmermann, A., Zeller, E., Venugopal, T., Serio, C., Melchionna, M., Esposito, A., Di Febbraro, M., & Raia, P. (2025). EutherianCoP. An integrated biotic and climate database for conservation paleobiology based on eutherian mammals. Scientific Data, 12: 6. doi:10.1038/s41597-024-04181-4
+* Mondanaro, A., Di Febbraro, M., Melchionna, M., Maiorano, L., Di Marco, M., Edwards, N. R., Holden, P.B., Castiglione, S., Rook, L., & Raia, P. (2021). The role of habitat fragmentation in Pleistocene megafauna extinction in Eurasia. Ecography, 44(11), 1619-1630.
+* Mondanaro, A., Di Febbraro, M., Castiglione, S., Belfiore, A. M., Girardi, G., Melchionna, M., Serio, C., Esposito, A., & Raia, P. (2024). Modelling reveals the effect of climate and land use change on Madagascar’s chameleons fauna. Communications Biology, 7: 889. doi:10.1038/s42003-024-06597-5
+* Barve, N., Barve, V., Jiménez-Valverde, A., Lira-Noriega, A., Maher, S. P., Peterson, A. T., Soberón, J., & Villalobos, F. (2011). The crucial role of the accessible area in ecological niche modeling and species distribution modeling. Ecological modelling, 222(11), 1810-1819.
+* Hirzel, A. H., Hausser, J., Chessel, D., & Perrin, N. (2002). Ecological-niche factor analysis: How to compute habitat-suitability maps without absence data? Ecology, 83(7), 2027. doi:10.2307/3071784
+* Elith, J., & Leathwick, J. R. (2009). Species distribution models: ecological explanation and prediction across space and time. Annual review of ecology, evolution, and systematics, 40(1), 677-697.
+
