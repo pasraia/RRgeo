@@ -1,7 +1,6 @@
 Package: RRgeo
 Type: Package
 Title: Species Distribution Modelling for Rare Species
-Date: 2025-02-25
 Version: 0.0.3
 Authors@R: c(person(given = "Alessandro",
                       family = "Mondanaro",
@@ -35,7 +34,7 @@ Imports: ape, methods,pbapply,Rphylopars,RRphylo,dismo (>= 1.3),gtools, terra,
          parallel, ade4, sp, sf,scales, ks, leastcostpath, doSNOW, biomod2 (>= 4.2),utils
 Suggests: ggplot2, cowplot, openxlsx, Bchron, curl, rnaturalearth, rnaturalearthhires,
           spatstat.geom, spatstat.explore, knitr
-Config/Needs/website:	ropensci/rnaturalearthhires
+Config/Needs/check:	ropensci/rnaturalearthhires
 Additional_repositories:	http://packages.ropensci.org
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2
