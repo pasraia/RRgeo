@@ -5,6 +5,12 @@ if (!requireNamespace("rmarkdown", quietly = TRUE) ||
    knitr::knit_exit()
 }
 
+misspacks<-sapply(c("rnaturalearth","ggplot2"),requireNamespace,quietly=TRUE)
+if(any(!misspacks)){
+  warning(call. = FALSE,paste(names(misspacks)[which(!misspacks)],collapse=", "), "not found, the vignettes is not built")
+   knitr::knit_exit()
+}
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -18,7 +24,7 @@ require(ggplot2)
 require(terra)
 require(sf)
 options(rmarkdown.html_vignette.check_title = FALSE)
-load(file.path(dirname(getwd()),"inst","exdata","Ursus_occurrences.RDa"))
+load(file.path(dirname(getwd()),"inst","exdata","Ursus_occurrences.Rda"))
 rast(file.path(dirname(getwd()),"inst","exdata","U.arctos_suitability.tif"))->map1
 rast(file.path(dirname(getwd()),"inst","exdata","U.maritimus_suitability.tif"))->map2
 

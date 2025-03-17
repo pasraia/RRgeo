@@ -23,12 +23,19 @@
 #'@seealso \link{ENphylo_modeling}; \href{../doc/ENphylo.html}{\code{getENphylo_results} vignette}
 #'@examples
 #'\dontrun{
+#'  library(ape)
+#'  library(terra)
+#'  library(sf)
+#'  library(RRgeo)
+#'
 #'  setwd("YOUR_DIRECTORY")
-#'  load(url("https://zenodo.org/records/14936297/files/dat.Rda?download=1"))
+#'  load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
 #'  read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 #'  tree$tip.label<-gsub("_"," ",tree$tip.label)
 #'
-#'  rast(system.file("exdata/X35kya.tif", package="RRgeo"))->map35
+#'  curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+#'                     destfile = "X35kya.tif", quiet = FALSE)
+#'  rast("X35kya.tif")->map35
 #'  project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 #'
 #'  ENphylo_modeling(input_data=dat,

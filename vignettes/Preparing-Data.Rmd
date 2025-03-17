@@ -164,7 +164,9 @@ In the chunk below, we used the map of a random "bio" variable at 35 kyr as a ge
 
 
 ```{r eval=FALSE}
-rast(system.file("exdata/X35kya.tif", package="RRgeo"))->map35
+curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+                   destfile = "X35kya.tif", quiet = FALSE)
+rast("X35kya.tif")->map35
 map35[[1]]->map
 ```
 ```{r density}

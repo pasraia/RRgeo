@@ -206,7 +206,7 @@ eucop_data_preparation<-function (input.dir,
   if (variables == "climveg" | variables == "all") {
     if (file.exists(paste0(input.dir, "/climveg.zip")))
       print("climveg.zip file is already present in the input.dir folder") else
-        curl::curl_download("https://zenodo.org/records/14936297/files/climveg.zip?download=1",
+        curl::curl_download("https://zenodo.org/records/14998748/files/climveg.zip?download=1",
                             destfile = paste0(input.dir, "/climveg.zip"), quiet = FALSE)
     utils::unzip(paste0(input.dir, "/climveg.zip"), exdir = file.path(input.dir,"climveg"))
     nn <- paste0("X", seq(0, 130, 1), "kya")
@@ -225,7 +225,7 @@ eucop_data_preparation<-function (input.dir,
   if (variables == "bio" | variables == "all") {
     if (file.exists(paste0(input.dir, "/bio.zip")))
       print("bio.zip file is already present in the input.dir folder") else
-        curl::curl_download("https://zenodo.org/records/14936297/files/bio.zip?download=1",
+        curl::curl_download("https://zenodo.org/records/14998748/files/bio.zip?download=1",
                             destfile = paste0(input.dir, "/bio.zip"), quiet = FALSE)
     utils::unzip(paste0(input.dir, "/bio.zip"), exdir = file.path(input.dir,"bio"))
     nn <- paste0("X", seq(0, 130, 1), "kya")
@@ -379,6 +379,11 @@ eucop_data_preparation<-function (input.dir,
       }
       all <- lapply(ll, function(bb) {
         vv <- vars[[which(names(vars) %in% unique(bb$time))]]
+        if(any(which.vars%in%c("LAI","NPP","megabiome"))){
+          prova1 <- app(vv, fun = sum)
+          prova1[!is.na(prova1)] <- 1
+          vv <- vv * prova1
+        }
         project(vv,st_crs(pol)$proj4string,res=50000)->vv
         vv <- mask(crop(vv, vect(pol)), vect(pol))
         xx <- fix.coastal.points(data = bb,
@@ -513,6 +518,11 @@ eucop_data_preparation<-function (input.dir,
       ll <- split(jjj2, jjj2$time)
       all <- lapply(ll, function(bb) {
         vv <- vars[[which(names(vars) %in% unique(bb$time))]]
+        if(any(which.vars%in%c("LAI","NPP","megabiome"))){
+          prova1 <- app(vv, fun = sum)
+          prova1[!is.na(prova1)] <- 1
+          vv <- vv * prova1
+        }
         project(vv,st_crs(jjj2)$proj4string,res=50000)->vv
         xx <- fix.coastal.points(data = bb, r = vv, ncell = 2, occ.desaggregation = remove.duplicates)
         all <- extract(vv, xx, ID = FALSE)

@@ -5,8 +5,9 @@ if (!requireNamespace("rmarkdown", quietly = TRUE) ||
    knitr::knit_exit()
 }
 
-if (!requireNamespace("kableExtra", quietly = TRUE)) {
-   warning(call. = FALSE, "kableExtra not found, the vignettes is not built")
+misspacks<-sapply(c("rnaturalearth","ggplot2","viridis","ggtext"),requireNamespace,quietly=TRUE)
+if(any(!misspacks)){
+  warning(call. = FALSE,paste(names(misspacks)[which(!misspacks)],collapse=", "), "not found, the vignettes is not built")
    knitr::knit_exit()
 }
 
@@ -51,7 +52,7 @@ as.data.frame(map2,xy=T)->map2
 #  # names(datG)<-sapply(strsplit(grep(".gpkg",list.files(),value=TRUE),"_"),"[[",1)
 #  # dat<-lapply(datG,function(x) x[,c("OBS","age","bio1", "bio4", "bio11", "bio19")])
 #  setwd("YOUR_DIRECTORY")
-#  load(url("https://zenodo.org/records/14936297/files/dat.Rda?download=1"))
+#  load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
 #  read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 #  tree$tip.label<-gsub("_"," ",tree$tip.label)
 
@@ -59,7 +60,9 @@ as.data.frame(map2,xy=T)->map2
 head(dat[1])
 
 ## ----enmod, eval=FALSE--------------------------------------------------------
-#  rast(system.file("exdata/X35kya.tif", package="RRgeo"))->map35
+#  curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+#                      destfile = "X35kya.tif", quiet = FALSE)
+#  rast("X35kya.tif")->map35
 #  project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 #  
 #  ENphylo_modeling(input_data=dat,

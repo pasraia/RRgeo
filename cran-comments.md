@@ -18,18 +18,7 @@ Availability using Additional_repositories specification:
 
 Uses the superseded package: ‘doSNOW’
 
-Size of tarball: 10964188 bytes
-
 -This note is about the package 'rnaturalearthhires' which is available from an additional repository as indicated in the DESCRIPTION of the package.
-
-
-* checking installed package size ... NOTE
-  installed size is 10.9Mb
-  sub-directories of 1Mb or more:
-    doc      3.1Mb
-    exdata   7.0Mb
- 
--This is just memory allocation to vignette files.
 
 
 * checking for future file timestamps ... NOTE
@@ -40,7 +29,6 @@ unable to verify current time
 
 
 ** Windows 10 Pro, R 4.4.1
-
 * checking CRAN incoming feasibility ... [16s] NOTE
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
 
@@ -53,18 +41,7 @@ Availability using Additional_repositories specification:
 
 Uses the superseded package: 'doSNOW'
 
-Size of tarball: 9667674 bytes
-
 -This note is about the package 'rnaturalearthhires' which is available from  an additional repository as indicated in the DESCRIPTION of the package.
-
-
-* checking installed package size ... NOTE
-  installed size is  9.1Mb
-  sub-directories of 1Mb or more:
-    doc      1.3Mb
-    exdata   7.0Mb
-
--This is just memory allocation to vignette files.
 
 
 * checking for future file timestamps ... NOTE
@@ -80,6 +57,11 @@ unable to verify current time
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
 
 New submission
+
+Possibly misspelled words in DESCRIPTION:
+  Mondanaro (27:83, 27:180)
+  al (27:96, 27:193)
+  et (27:93, 27:190)
 
 Suggests or Enhances not in mainstream repositories:
   rnaturalearthhires
@@ -99,6 +81,11 @@ Package suggested but not available for checking: 'rnaturalearthhires'
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
 
 New submission
+
+Possibly misspelled words in DESCRIPTION:
+  Mondanaro (27:83, 27:180)
+  al (27:96, 27:193)
+  et (27:93, 27:190)
 
 Suggests or Enhances not in mainstream repositories:
   rnaturalearthhires

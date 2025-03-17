@@ -403,7 +403,7 @@ chunk.</p>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># names(datG)&lt;-sapply(strsplit(grep(&quot;.gpkg&quot;,list.files(),value=TRUE),&quot;_&quot;),&quot;[[&quot;,1)</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># dat&lt;-lapply(datG,function(x) x[,c(&quot;OBS&quot;,&quot;age&quot;,&quot;bio1&quot;, &quot;bio4&quot;, &quot;bio11&quot;, &quot;bio19&quot;)])</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;YOUR_DIRECTORY&quot;</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">&quot;https://zenodo.org/records/14936297/files/dat.Rda?download=1&quot;</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">&quot;https://zenodo.org/records/14998748/files/dat.Rda?download=1&quot;</span>))</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">read.tree</span>(<span class="fu">system.file</span>(<span class="st">&quot;exdata/Eucopdata_tree.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;RRgeo&quot;</span>))<span class="ot">-&gt;</span>tree</span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>tree<span class="sc">$</span>tip.label<span class="ot">&lt;-</span><span class="fu">gsub</span>(<span class="st">&quot;_&quot;</span>,<span class="st">&quot; &quot;</span>,tree<span class="sc">$</span>tip.label)</span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">head</span>(dat[<span class="dv">1</span>])</span>
@@ -478,23 +478,25 @@ ensure that the threshold is respected. In each subtree, the function
 automatically selects species that are phylogenetically close to the
 species to impute and preferentially splits the latter into different
 trees.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">rast</span>(<span class="fu">system.file</span>(<span class="st">&quot;exdata/X35kya.tif&quot;</span>, <span class="at">package=</span><span class="st">&quot;RRgeo&quot;</span>))<span class="ot">-&gt;</span>map35</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">project</span>(map35,<span class="fu">st_crs</span>(dat[[<span class="dv">1</span>]])<span class="sc">$</span>proj4string,<span class="at">res =</span> <span class="dv">50000</span>)<span class="ot">-&gt;</span>map</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">ENphylo_modeling</span>(<span class="at">input_data=</span>dat,</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                 <span class="at">tree=</span>tree,</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                 <span class="at">input_mask=</span>map[[<span class="dv">1</span>]],</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                 <span class="at">obs_col=</span><span class="st">&quot;OBS&quot;</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                 <span class="at">time_col=</span><span class="st">&quot;age&quot;</span>, </span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                 <span class="at">min_occ_enfa=</span><span class="dv">15</span>, </span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                 <span class="at">boot_test_perc=</span><span class="dv">20</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                 <span class="at">boot_reps=</span><span class="dv">10</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                 <span class="at">swap.args=</span><span class="fu">list</span>(<span class="at">nsim=</span><span class="dv">10</span>,<span class="at">si=</span><span class="fl">0.2</span>,<span class="at">si2=</span><span class="fl">0.2</span>),</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                 <span class="at">eval.args=</span><span class="fu">list</span>(<span class="at">eval_metric_for_imputation=</span><span class="st">&quot;AUC&quot;</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>                                <span class="at">eval_threshold=</span><span class="fl">0.7</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>                                <span class="at">output_options=</span><span class="st">&quot;best&quot;</span>),</span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>                 <span class="at">clust=</span><span class="fl">0.5</span>, </span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>                 <span class="at">output.dir=</span><span class="st">&#39;.&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>curl<span class="sc">::</span><span class="fu">curl_download</span>(<span class="st">&quot;https://zenodo.org/records/14998748/files/X35kya.tif?download=1&quot;</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                    <span class="at">destfile =</span> <span class="st">&quot;X35kya.tif&quot;</span>, <span class="at">quiet =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">rast</span>(<span class="st">&quot;X35kya.tif&quot;</span>)<span class="ot">-&gt;</span>map35</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">project</span>(map35,<span class="fu">st_crs</span>(dat[[<span class="dv">1</span>]])<span class="sc">$</span>proj4string,<span class="at">res =</span> <span class="dv">50000</span>)<span class="ot">-&gt;</span>map</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">ENphylo_modeling</span>(<span class="at">input_data=</span>dat,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                 <span class="at">tree=</span>tree,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                 <span class="at">input_mask=</span>map[[<span class="dv">1</span>]],</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                 <span class="at">obs_col=</span><span class="st">&quot;OBS&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                 <span class="at">time_col=</span><span class="st">&quot;age&quot;</span>, </span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                 <span class="at">min_occ_enfa=</span><span class="dv">15</span>, </span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                 <span class="at">boot_test_perc=</span><span class="dv">20</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                 <span class="at">boot_reps=</span><span class="dv">10</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>                 <span class="at">swap.args=</span><span class="fu">list</span>(<span class="at">nsim=</span><span class="dv">10</span>,<span class="at">si=</span><span class="fl">0.2</span>,<span class="at">si2=</span><span class="fl">0.2</span>),</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>                 <span class="at">eval.args=</span><span class="fu">list</span>(<span class="at">eval_metric_for_imputation=</span><span class="st">&quot;AUC&quot;</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>                                <span class="at">eval_threshold=</span><span class="fl">0.7</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>                                <span class="at">output_options=</span><span class="st">&quot;best&quot;</span>),</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>                 <span class="at">clust=</span><span class="fl">0.5</span>, </span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>                 <span class="at">output.dir=</span><span class="st">&#39;.&#39;</span>)</span></code></pre></div>
 <div id="output" class="section level3">
 <h3><code>ENphylo_modeling</code> outputs</h3>
 <p><code>ENphylo_modeling</code> creates two output folders within the

@@ -1,5 +1,6 @@
 #' @importFrom terra focalMat distance as.polygons
 #' @importFrom sf st_convex_hull st_union st_bbox
+#' @importFrom stats cutree
 occ.desaggregation.RASTER<-function (df, colxy, rast, plot = TRUE) {
   df_ini <- df
   obj <- cellFromXY(rast, df[, colxy])
@@ -118,3 +119,101 @@ density_background<-function(pres.locs, MASK, rm.pres=TRUE) {
 }
 
 utils::globalVariables(c("intcal20","shcal20", "marine20","model_outputs"))
+
+ENtree<-function(tree,impa,imp.max=0.3,mts=100,mints=10){
+  # require(ape)
+
+  if(length(impa)>Ntip(tree)) stop("wrong tree, too many species to impute")
+  if(mints>Ntip(tree)) stop("too small tree to impute")
+  imps=impa
+  floor(mts*imp.max)->imp.lim
+  tree$tip.label[-which(tree$tip.label%in%impa)]->tip.in
+  cophenetic.phylo(tree)[tip.in, impa]->dx
+
+  if(length(impa)==1){
+    treeX<-list()
+    if(Ntip(tree)<mints){
+      tree->treeX
+      return(list(trees=treeX,save=1-Ntip(treeX)/Ntip(tree)))
+    } else {
+      c(impa,names(sort(dx)[1:mints]))->tin
+      tin[1:mints]->tin
+      keep.tip(tree,tin)->treeX
+      return(list(trees=treeX))
+    }
+  } else {
+    rowSums(dx)->d.rank
+    1/d.rank->d.rank
+  }
+
+  if(mts<Ntip(tree)){
+    treeX<-list()
+    e=1
+    repeat{
+      as.dist(cophenetic.phylo(tree)[imps,imps])->d
+      length(imps)-imp.lim->i.out
+      if(i.out<=0){
+        ceiling(length(imps)/imp.max)->tmin
+        length(tip.in)-tmin+length(imps)->sout
+        d.rank[tip.in]->d.rank
+        if(sout<0) tip.in->tip.in else sample(tip.in,(length(tip.in)-sout),prob=d.rank)->tip.in
+        keep.tip(tree,c(tip.in, imps))->treeX[[e]]
+        imps[-which(imps%in%treeX[[e]]$tip.label)]->imps
+        if(length(imps)==0) break
+      } else {
+        hclust(d,method="complete")->hh
+        c <- cutree(hh, k = (length(imps)-i.out))
+        tapply(c,as.factor(c),function(x) sample(names(x),1))->sel.in
+        (ceiling(length(sel.in)/imp.max)-length(sel.in))->tmin
+        if(length(tip.in)>tmin){
+          length(tip.in)-tmin->sout
+          sample(tip.in,length(tip.in)-sout,prob=d.rank)->tip.in
+          keep.tip(tree,c(tip.in, sel.in))->treeX[[e]]
+        } else {
+          keep.tip(tree,c(tip.in, sel.in))->treeX[[e]]
+        }
+      }
+      imps[-which(imps%in%treeX[[e]]$tip.label)]->imps
+      if(length(imps)==0) break
+
+      e=e+1
+
+    }
+    if(length(unique(unlist(lapply(treeX,function(x) x$tip.label))))<=Ntip(tree))
+      return(list(trees=treeX))
+  } else {
+    treeX<-list()
+    e=1
+    length(impa)->ll
+    k=floor((Ntip(tree)-ll)*imp.max)
+    repeat{
+      as.dist(cophenetic.phylo(tree)[imps,imps])->d
+      if(length(d)==0){
+        keep.tip(tree,c(tree$tip.label[-which(tree$tip.label%in%impa)],imps))->treeX[[e]]
+        imps[-which(imps%in%treeX[[e]]$tip.label)]->imps
+      } else {
+        hclust(d,method = "complete")->hc
+        if(length(d)==1){
+          keep.tip(tree,c(tree$tip.label[-which(tree$tip.label%in%impa)],imps))->treeX[[e]]
+          imps[-which(imps%in%treeX[[e]]$tip.label)]->imps
+        } else {
+
+          if(length(imps)<k){
+            keep.tip(tree,c(tree$tip.label[-which(tree$tip.label%in%impa)],imps))->treeX[[e]]
+            imps[-which(imps%in%treeX[[e]]$tip.label)]->imps
+          } else {
+            c <- cutree(hc, k = k)
+            tapply(c,as.factor(c),function(x) sample(names(x),1))->sels
+            keep.tip(tree,c(tree$tip.label[-which(tree$tip.label%in%impa)],sels))->treeX[[e]]
+            imps[-which(imps%in%sels)]->imps
+          }
+        }
+      }
+      e=e+1
+      if(length(imps)==0) break
+
+    }
+    if(length(unique(unlist(lapply(treeX,function(x) x$tip.label))))<=Ntip(tree))
+      return(list(trees=treeX))
+  }
+}
