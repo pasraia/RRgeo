@@ -194,10 +194,11 @@ plot(p_dens)
 Example: we picked the 35 kyr time interval and a random "bio" variable to produce a toy example of what is described above. This time interval includes 7 occurrences of *U. spelaeus*. To calculate the density map, `eucop_data_preparation` uses an `RRgeo` internal function named `density_background`. Additionally, the function excludes the occupied cells from the density map (the blank cells in the figure) to prevent misleading conclusions about habitat suitability or the species' environmental preferences. After partitioning 10000 pseudoabsences over time, our sample of pseudoabsences for the 35 kyr time interval includes 386 datapoints.
 
 ```{r loadpseudoabsence, eval=FALSE}
-load(file.path(dirname(getwd()),"inst","exdata","outputs.Rda"))
+load(system.file("exdata/outputs.Rda",package="RRgeo"))
 ```
 
-```{r pseudoabsence, echo=FALSE}
+```{r pseudoabsence, echo=-1}
+load(file.path(dirname(getwd()),"inst","exdata","outputs.Rda"))
 ggplot()+
   geom_sf(data=euromap,col="grey40",fill="white")+
   geom_sf(data=psabs.points,aes(fill="pseudoabsence"),size=2.5,color="black",pch=21)+

@@ -126,9 +126,10 @@ p_dens<-ggplot()+
 plot(p_dens)
 
 ## ----loadpseudoabsence, eval=FALSE--------------------------------------------
-#  load(file.path(dirname(getwd()),"inst","exdata","outputs.Rda"))
+#  load(system.file("exdata/outputs.Rda",package="RRgeo"))
 
-## ----pseudoabsence, echo=FALSE------------------------------------------------
+## ----pseudoabsence, echo=-1---------------------------------------------------
+load(file.path(dirname(getwd()),"inst","exdata","outputs.Rda"))
 ggplot()+
   geom_sf(data=euromap,col="grey40",fill="white")+
   geom_sf(data=psabs.points,aes(fill="pseudoabsence"),size=2.5,color="black",pch=21)+
