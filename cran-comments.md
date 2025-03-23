@@ -6,6 +6,7 @@
 ## R CMD check results
 
 ** Mac OS 15.3.1, R 4.4.1
+0 errors | 0 warnings | 2 notes
 * checking CRAN incoming feasibility ... [2s/12s] NOTE
 Maintainer: ‘Silvia Castiglione <silvia.castiglione@unina.it>’
 
@@ -29,6 +30,7 @@ unable to verify current time
 
 
 ** Windows 10 Pro, R 4.4.1
+0 errors | 0 warnings | 2 notes
 * checking CRAN incoming feasibility ... [16s] NOTE
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
 
@@ -53,6 +55,7 @@ unable to verify current time
 
 ** win-builder (devel and release)
 ** release
+0 errors | 0 warnings | 2 notes
 * checking CRAN incoming feasibility ... [10s] NOTE
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
 
@@ -62,6 +65,8 @@ Possibly misspelled words in DESCRIPTION:
   Mondanaro (27:83, 27:180)
   al (27:96, 27:193)
   et (27:93, 27:190)
+
+- The words are all correctly spelled
 
 Suggests or Enhances not in mainstream repositories:
   rnaturalearthhires
@@ -77,6 +82,7 @@ Package suggested but not available for checking: 'rnaturalearthhires'
 
 
 ** devel
+0 errors | 0 warnings | 1 note
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
 
@@ -86,6 +92,8 @@ Possibly misspelled words in DESCRIPTION:
   Mondanaro (27:83, 27:180)
   al (27:96, 27:193)
   et (27:93, 27:190)
+  
+- The words are all correctly spelled
 
 Suggests or Enhances not in mainstream repositories:
   rnaturalearthhires

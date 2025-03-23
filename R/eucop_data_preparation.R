@@ -348,6 +348,10 @@ eucop_data_preparation<-function (input.dir,
       jjj2 <- st_as_sf(sp[[jj]], coords = c("longitude", "latitude"),
                        crs = 4326)
       jjj2 <- st_transform(jjj2,st_crs("ESRI:54009"))
+      if (nrow(jjj2[!duplicated(jjj2$geometry),])<= 3) {
+        print(paste(unique(sp[[jj]]$species),"has too few occurrences for defining the study area. The species was skipped"))
+        return(NULL)
+      }
       pol <- st_convex_hull(st_union(jjj2))
       buf <- max(st_distance(jjj2)) * buff
       pol <- st_buffer(pol, dist = as.numeric(buf))
@@ -389,64 +393,66 @@ eucop_data_preparation<-function (input.dir,
         xx <- fix.coastal.points(data = bb,
                                  r = vv[[1]], ncell = 2,
                                  occ.desaggregation = remove.duplicates)
-        all <- data.frame(extract(vv, xx, ID = FALSE))
-        all <- cbind(OBS = 1,xx, all)
-        all <- all[, grep("time", colnames(all), invert = TRUE)]
-        all <- all[!apply(is.na(all[, colnames(all) %in%
-                                      names(vars[[1]]),drop=FALSE]), 1, all), ]
-        all$mean.age <- round(all$mean.age/1000) * 1000
+        if(nrow(xx)>0){
+          all <- data.frame(extract(vv, xx, ID = FALSE))
+          all <- cbind(OBS = 1,xx, all)
+          all <- all[, grep("time", colnames(all), invert = TRUE)]
+          all <- all[!apply(is.na(all[, colnames(all) %in%
+                                        names(vars[[1]]),drop=FALSE]), 1, all), ]
+          all$mean.age <- round(all$mean.age/1000) * 1000
 
-        if (bk_strategy == "pseudoabsence") {
-          mm <- vv[[1]]
-          mm[!is.na(mm), ] <- 1
-          dens.ras <- dens * mm
-          n.PA <- zeros[[which(names(zeros) %in% unique(bb$time))]]
-          dens.ras.rtp <- cbind(data.frame(crds(dens.ras)),
-                                as.points(dens.ras))
-          dens.ras.rtp <- cbind(dens.ras.rtp, extract(dens.ras,
-                                                      dens.ras.rtp[, 1:2], cells = TRUE)$cell)
-          dens.ras.rtp[dens.ras.rtp[, 3] < 0.001, 3] <- 0.001
-          PO <- xyFromCell(dens.ras, dens.ras.rtp[sample(1:nrow(dens.ras.rtp),
-                                                         ifelse(nrow(dens.ras.rtp) < n.PA, nrow(dens.ras.rtp),
-                                                                n.PA), prob = dens.ras.rtp[, 3]), 4])
-          bk <- extract(vv, data.frame(PO), xy = TRUE,
-                        ID = FALSE)
-          st_as_sf(bk,coords=c("x","y"),crs=crs(mm))->vv1
-        }
-
-        if (bk_strategy == "background") {
-          r1 <- extract(vv, all,
-                        ID = FALSE, cells = TRUE, xy = TRUE)
-
-          vv1 <- as.data.frame(vv, na.rm = TRUE, xy = TRUE,cells=TRUE)
-          vv1[,match(colnames(r1),colnames(vv1))]->r2
-
-          ad <- adjacent(vv[[1]], r1$cell, pairs = TRUE,
-                         directions = 16)
-          ad <- setdiff(unique(c(ad[, 2])), unique(c(ad[,
-                                                        1])))
-          ad <- r2[r2$cell %in% ad, ]
-          ad <- ad[complete.cases(ad), , drop = FALSE]
-          rr <- rbind(r1, ad)
-          bk <- r2[!r2$cell %in% rr$cell, ]
-          if (nrow(bk)>bk_n){
-            bk <- bk[sample(nrow(bk), bk_n - nrow(rr)),
-            ]
+          if (bk_strategy == "pseudoabsence") {
+            mm <- vv[[1]]
+            mm[!is.na(mm), ] <- 1
+            dens.ras <- dens * mm
+            n.PA <- zeros[[which(names(zeros) %in% unique(bb$time))]]
+            dens.ras.rtp <- cbind(data.frame(crds(dens.ras)),
+                                  as.points(dens.ras))
+            dens.ras.rtp <- cbind(dens.ras.rtp, extract(dens.ras,
+                                                        dens.ras.rtp[, 1:2], cells = TRUE)$cell)
+            dens.ras.rtp[dens.ras.rtp[, 3] < 0.001, 3] <- 0.001
+            PO <- xyFromCell(dens.ras, dens.ras.rtp[sample(1:nrow(dens.ras.rtp),
+                                                           ifelse(nrow(dens.ras.rtp) < n.PA, nrow(dens.ras.rtp),
+                                                                  n.PA), prob = dens.ras.rtp[, 3]), 4])
+            bk <- extract(vv, data.frame(PO), xy = TRUE,
+                          ID = FALSE)
+            st_as_sf(bk,coords=c("x","y"),crs=crs(mm))->vv1
           }
-          bk <- bk[, grep("cell", colnames(bk), invert = TRUE)]
-          rr <- rr[, grep("cell", colnames(rr), invert = TRUE)]
-          rbind(bk,rr)->bk
-          st_as_sf(bk,coords=c("x","y"),crs=crs(vv))->vv1
-        }
-        vv1$OBS <- 0
-        vv1$mean.age <- unique(all$mean.age)
-        vv1$locality <- "bk_locs"
-        vv1$continent <- NA
-        vv1$country <- NA
-        vv1$species <- unique(all$species)
-        vv1$status <- names(which.max(table(all$status)))
-        vv1 <- vv1[, match(colnames(all), colnames(vv1))]
-        all <- rbind(all, vv1)
+
+          if (bk_strategy == "background") {
+            r1 <- extract(vv, all,
+                          ID = FALSE, cells = TRUE, xy = TRUE)
+
+            vv1 <- as.data.frame(vv, na.rm = TRUE, xy = TRUE,cells=TRUE)
+            vv1[,match(colnames(r1),colnames(vv1))]->r2
+
+            ad <- adjacent(vv[[1]], r1$cell, pairs = TRUE,
+                           directions = 16)
+            ad <- setdiff(unique(c(ad[, 2])), unique(c(ad[,
+                                                          1])))
+            ad <- r2[r2$cell %in% ad, ]
+            ad <- ad[complete.cases(ad), , drop = FALSE]
+            rr <- rbind(r1, ad)
+            bk <- r2[!r2$cell %in% rr$cell, ]
+            if (nrow(bk)>bk_n){
+              bk <- bk[sample(nrow(bk), bk_n - nrow(rr)),
+              ]
+            }
+            bk <- bk[, grep("cell", colnames(bk), invert = TRUE)]
+            rr <- rr[, grep("cell", colnames(rr), invert = TRUE)]
+            rbind(bk,rr)->bk
+            st_as_sf(bk,coords=c("x","y"),crs=crs(vv))->vv1
+          }
+          vv1$OBS <- 0
+          vv1$mean.age <- unique(all$mean.age)
+          vv1$locality <- "bk_locs"
+          vv1$continent <- NA
+          vv1$country <- NA
+          vv1$species <- unique(all$species)
+          vv1$status <- names(which.max(table(all$status)))
+          vv1 <- vv1[, match(colnames(all), colnames(vv1))]
+          all <- rbind(all, vv1)
+        }else NULL
       })
       all_species <- do.call(rbind, all)
       rownames(all_species) <- NULL
@@ -525,11 +531,13 @@ eucop_data_preparation<-function (input.dir,
         }
         project(vv,st_crs(jjj2)$proj4string,res=50000)->vv
         xx <- fix.coastal.points(data = bb, r = vv, ncell = 2, occ.desaggregation = remove.duplicates)
-        all <- extract(vv, xx, ID = FALSE)
-        all <- cbind(OBS = 1, xx, all)
-        all <- all[, grep("time", colnames(all), invert = TRUE)]
-        all[!apply(is.na(all[, colnames(all) %in% names(vars[[1]]),drop=FALSE]),
-                   1, all), ]
+        if(nrow(xx)>0){
+          all <- extract(vv, xx, ID = FALSE)
+          all <- cbind(OBS = 1, xx, all)
+          all <- all[, grep("time", colnames(all), invert = TRUE)]
+          all[!apply(is.na(all[, colnames(all) %in% names(vars[[1]]),drop=FALSE]),
+                     1, all), ]
+        }else NULL
       })
       all_species <- do.call(rbind, all)
       rownames(all_species) <- NULL

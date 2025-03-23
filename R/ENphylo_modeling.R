@@ -210,7 +210,7 @@
 #'}
 
 
-ENphylo_modeling<-function (input_data = NULL,
+ENphylo_modeling<-function (input_data,
                             tree,
                             input_mask,
                             obs_col,

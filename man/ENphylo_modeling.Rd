@@ -6,7 +6,7 @@
  phylogenetic imputation}
 \usage{
 ENphylo_modeling(input_data, tree, input_mask, obs_col, time_col=NULL,
- min_occ_enfa=50, boot_test_perc=20, boot_reps=10, swap.args= list(nsim=10,
+ min_occ_enfa=30, boot_test_perc=20, boot_reps=10, swap.args= list(nsim=10,
  si=0.2, si2=0.2), eval.args=list(eval_metric_for_imputation="AUC",
  eval_threshold=0.7,output_options="best"),clust=0.5,output.dir='.')
 }
@@ -187,12 +187,18 @@ ENphylo
 }
 \examples{
 \dontrun{
+ library(ape)
+ library(terra)
+ library(sf)
+ library(RRgeo)
+
 setwd("YOUR_DIRECTORY")
-load(url("https://zenodo.org/records/14936297/files/dat.Rda?download=1"))
+load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
 read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 tree$tip.label<-gsub("_"," ",tree$tip.label)
-
-rast(system.file("exdata/X35kya.tif", package="RRgeo"))->map35
+curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+                    destfile = "X35kya.tif", quiet = FALSE)
+rast("X35kya.tif")->map35
 project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 
 ENphylo_modeling(input_data=dat,

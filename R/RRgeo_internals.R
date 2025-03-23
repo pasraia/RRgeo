@@ -1,5 +1,5 @@
 #' @importFrom terra focalMat distance as.polygons
-#' @importFrom sf st_convex_hull st_union st_bbox
+#' @importFrom sf st_convex_hull st_union st_bbox st_sf st_sfc
 #' @importFrom stats cutree
 occ.desaggregation.RASTER<-function (df, colxy, rast, plot = TRUE) {
   df_ini <- df
@@ -73,7 +73,7 @@ fix.coastal.points<-function (data,r, ncell, occ.desaggregation){
 
     }else {
       final2 <- final1
-      final2 <-st_as_sf(final2,coords=xy.cols,crs=crs_data)
+      if(nrow(final2)>0) final2<-st_as_sf(final2, coords = xy.cols, crs = crs_data)
     }
     if (occ.desaggregation == FALSE)
       final2 <- final1
@@ -87,7 +87,11 @@ fix.coastal.points<-function (data,r, ncell, occ.desaggregation){
             nrow(final2), sep = "")
     cat("\n", "final sample size: ", nrow(final2), sep = "")
     cat("\n")
-    final2 <-st_as_sf(final2,coords=xy.cols,crs=crs_data)
+
+    if(nrow(final2)>0)
+      final2 <- st_as_sf(final2, coords = xy.cols, crs = crs_data) else
+        final2 <-st_sf(geometry = st_sfc(), crs = crs_data)
+
     return(final2)
   }
   if (length(vv) == 0) {

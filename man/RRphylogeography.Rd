@@ -77,12 +77,13 @@ The function integrates phylogenetic and geographical data (i.e.,
 }
 \examples{
 \dontrun{
-setwd("YOUR_DIRECTORY")
-getwd()->main.dir
 
 library(RRgeo)
 library(terra)
 library(sf)
+
+setwd("YOUR_DIRECTORY")
+getwd()->main.dir
 
 rast(system.file("exdata/U.arctos_suitability.tif", package="RRgeo"))->map1
 rast(system.file("exdata/U.maritimus_suitability.tif", package="RRgeo"))->map2
