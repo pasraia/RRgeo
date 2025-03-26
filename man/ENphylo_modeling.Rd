@@ -194,8 +194,9 @@ library(RRgeo)
 
 newwd<-tempdir()
 # newwd<-"YOUR_DIRECTORY"
-
-load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
+curl::curl_download("https://zenodo.org/records/14998748/files/dat.Rda?download=1",
+                    destfile = file.path(newwd,"dat.Rda"), quiet = FALSE)
+load(file.path(newwd,"dat.Rda"))
 read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 tree$tip.label<-gsub("_"," ",tree$tip.label)
 curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
