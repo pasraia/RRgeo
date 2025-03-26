@@ -41,7 +41,7 @@
 #'@export
 #'@seealso \link[Bchron]{BchronCalibrate}
 #'@examples
-#' \dontrun{
+#' \donttest{
 #'
 #' library(RRgeo)
 #'
@@ -61,7 +61,6 @@
 #'        clust=NULL,
 #'        save= FALSE)->res
 #'
-#' View(res)
 #'}
 
 cal14C<-function (dataset,
@@ -118,7 +117,7 @@ cal14C<-function (dataset,
     dat <- dat[-which(is.na(dat$curve)), ]
   }else add_dat <- NULL
 
-  cat(paste("\n", "PERFORMING CALIBRATION", "\n"))
+  message("\n", "PERFORMING CALIBRATION", "\n")
   if (!is.null(clust)) {
     cl <- detectCores() * clust
     cl <- makeCluster(cl)

@@ -109,6 +109,7 @@ project(map,st_crs(pol_with_buffer)$proj4string,res = 50000)->map
 mask(crop(map,vect(pol_with_buffer)),vect(pol_with_buffer))->map
 RRgeo:::density_background(pres.locs=occs, MASK=map, rm.pres=TRUE)->dens.ras
 as.data.frame(dens.ras,xy=TRUE)->dens.probs
+colnames(dens.probs)[3]<-"lyr.1"
 
 p_dens<-ggplot()+
   geom_sf(data=euromap)+
@@ -151,8 +152,8 @@ ggplot()+
 #                  "Mustela nivalis","Procyon lotor","Ursus arctos","Ursus ingressus",
 #                  "Ursus maritimus","Ursus spelaeus","Vulpes velox","Vulpes vulpes" )
 #  
-#  setwd("YOUR_DIRECTORY")
+#  yourdir<-"YOUR_DIRECTORY"
 #  eucop_data_preparation(input.dir=getwd(), species_name=species_vec, variables="bio",
 #                         calibration=TRUE, combine.ages="mean", bk_points=list(),
-#                         output.dir=getwd())
+#                         output.dir=yourdir)
 

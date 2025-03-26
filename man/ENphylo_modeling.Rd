@@ -186,22 +186,24 @@ ENphylo
  \code{eval_metric_for_imputation} set to run the of ENphylo model.}
 }
 \examples{
-\dontrun{
- library(ape)
- library(terra)
- library(sf)
- library(RRgeo)
+\donttest{
+library(ape)
+library(terra)
+library(sf)
+library(RRgeo)
 
-setwd("YOUR_DIRECTORY")
+newwd<-tempdir()
+# newwd<-"YOUR_DIRECTORY"
+
 load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
 read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 tree$tip.label<-gsub("_"," ",tree$tip.label)
 curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
-                    destfile = "X35kya.tif", quiet = FALSE)
-rast("X35kya.tif")->map35
+                    destfile = file.path(newwd,"X35kya.tif"), quiet = FALSE)
+rast(file.path(newwd,"X35kya.tif"))->map35
 project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 
-ENphylo_modeling(input_data=dat,
+ENphylo_modeling(input_data=dat[c(1,11)],
                  tree=tree,
                  input_mask=map[[1]],
                  obs_col="OBS",
@@ -209,12 +211,12 @@ ENphylo_modeling(input_data=dat,
                  min_occ_enfa=15,
                  boot_test_perc=20,
                  boot_reps=10,
-                 swap.args=list(nsim=10,si=0.2,si2=0.2),
+                 swap.args=list(nsim=5,si=0.2,si2=0.2),
                  eval.args=list(eval_metric_for_imputation="AUC",
                                 eval_threshold=0.7,
                                 output_options="best"),
-                 clust=0.5,
-                 output.dir='.')
+                 clust=NULL,
+                 output.dir=newwd)
 
 }
 }

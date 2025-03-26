@@ -76,18 +76,18 @@ The function integrates phylogenetic and geographical data (i.e.,
  \code{th} are excluded from distance calculation.
 }
 \examples{
-\dontrun{
+\donttest{
 
 library(RRgeo)
 library(terra)
 library(sf)
 
-setwd("YOUR_DIRECTORY")
-getwd()->main.dir
+newwd<-tempdir()
+# newwd<-"YOUR_DIRECTORY"
 
 rast(system.file("exdata/U.arctos_suitability.tif", package="RRgeo"))->map1
 rast(system.file("exdata/U.maritimus_suitability.tif", package="RRgeo"))->map2
-load(system.file("exdata/Ursus_occurrences.RDa"), package="RRgeo"))
+load(system.file("exdata/Ursus_occurrences.Rda", package="RRgeo"))
 list(Ursus_arctos=map1,Ursus_maritimus=map2)->pred
 list(Ursus_arctos=occs_arctos,Ursus_maritimus=occs_marit)->occs
 
@@ -95,16 +95,16 @@ RRphylogeography(spec1="Ursus_arctos",
                  spec2="Ursus_maritimus",
                  pred=pred,
                  occs=occs,
-                 aggr=2,
+                 aggr=5,
                  time_col="TIME_factor",
                  kde_inversion=FALSE,
                  resistance_map=NULL,
-                 clust=0.5,
+                 clust=NULL,
                  plot=FALSE,
                  mask_for_pred=NULL,
+                 th=0.7,
                  standardize=TRUE,
-                 output.dir=main.dir)
-
+                 output.dir=newwd)
 }
 }
 \references{

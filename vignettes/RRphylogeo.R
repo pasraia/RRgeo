@@ -44,7 +44,8 @@ head(occs$Ursus_arctos)
 
 
 ## ----RRphylogeo,eval=FALSE----------------------------------------------------
-#  setwd("YOUR_DIRECTORY")
+#  yourdir<-"YOUR_DIRECTORY"
+#  setwd(yourdir)
 #  
 #  RRphylogeography(spec1="Ursus_arctos",
 #                   spec2="Ursus_maritimus",
@@ -58,7 +59,7 @@ head(occs$Ursus_arctos)
 #                   plot=FALSE,
 #                   mask_for_pred=NULL,
 #                   standardize=TRUE,
-#                   output.dir='.')
+#                   output.dir=yourdir)
 #  
 
 ## ----RPO,out.width='95%',dpi=300,echo=FALSE-----------------------------------

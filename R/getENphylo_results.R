@@ -22,39 +22,42 @@
 #'@export
 #'@seealso \link{ENphylo_modeling}; \href{../doc/ENphylo.html}{\code{getENphylo_results} vignette}
 #'@examples
-#'\dontrun{
-#'  library(ape)
-#'  library(terra)
-#'  library(sf)
-#'  library(RRgeo)
+#'\donttest{
+#' library(ape)
+#' library(terra)
+#' library(sf)
+#' library(RRgeo)
 #'
-#'  setwd("YOUR_DIRECTORY")
-#'  load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
-#'  read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
-#'  tree$tip.label<-gsub("_"," ",tree$tip.label)
+#' newwd<-tempdir()
+#' # newwd<-"YOUR_DIRECTORY"
 #'
-#'  curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
-#'                     destfile = "X35kya.tif", quiet = FALSE)
-#'  rast("X35kya.tif")->map35
-#'  project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
+#' load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
+#' read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
+#' tree$tip.label<-gsub("_"," ",tree$tip.label)
+#' curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+#'                     destfile = file.path(newwd,"X35kya.tif"), quiet = FALSE)
+#' rast(file.path(newwd,"X35kya.tif"))->map35
+#' project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 #'
-#'  ENphylo_modeling(input_data=dat,
-#'                   tree=tree,
-#'                   input_mask=map[[1]],
-#'                   obs_col="OBS",
-#'                   time_col="age",
-#'                   min_occ_enfa=15,
-#'                   boot_test_perc=20,
-#'                   boot_reps=10,
-#'                   swap.args=list(nsim=10,si=0.2,si2=0.2),
-#'                   eval.args=list(eval_metric_for_imputation="AUC",
-#'                                  eval_threshold=0.7,
-#'                                  output_options="best"),
-#'                   clust=0.5,output.dir='.')
+#' ENphylo_modeling(input_data=dat[c(1,11)],
+#'                  tree=tree,
+#'                  input_mask=map[[1]],
+#'                  obs_col="OBS",
+#'                  time_col="age",
+#'                  min_occ_enfa=15,
+#'                  boot_test_perc=20,
+#'                  boot_reps=10,
+#'                  swap.args=list(nsim=5,si=0.2,si2=0.2),
+#'                  eval.args=list(eval_metric_for_imputation="AUC",
+#'                                 eval_threshold=0.7,
+#'                                 output_options="best"),
+#'                  clust=NULL,
+#'                  output.dir=newwd)
 #'
-#'  getENphylo_results(input.dir ='.',
-#'                     mods="all",
-#'                     species_name=c("Vulpes velox","Ursus maritimus"))->mod
+#' getENphylo_results(input.dir =newwd,
+#'                    mods="all",
+#'                    species_name=names(dat)[c(1,11)])->mod
+#'
 #'}
 
 getENphylo_results<-function (input.dir = ".",

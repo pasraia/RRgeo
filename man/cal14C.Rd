@@ -57,7 +57,7 @@ If \code{dataset} includes marine samples, the user should indicate
  related radiocarbon ages accordingly.
 }
 \examples{
-\dontrun{
+\donttest{
 
 library(RRgeo)
 
@@ -77,7 +77,6 @@ cal14C(dataset=data,
        clust=NULL,
        save= FALSE)->res
 
-View(res)
 }
 }
 \seealso{

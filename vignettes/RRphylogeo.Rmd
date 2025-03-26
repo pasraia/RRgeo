@@ -99,7 +99,8 @@ The standard format for individual elements of `occs` must include the column co
 * `standardize`: if `TRUE`, the output maps are rescaled  between 0 and 1.
 
 ```{r RRphylogeo,eval=FALSE}
-setwd("YOUR_DIRECTORY")
+yourdir<-"YOUR_DIRECTORY"
+setwd(yourdir)
 
 RRphylogeography(spec1="Ursus_arctos", 
                  spec2="Ursus_maritimus",
@@ -113,7 +114,7 @@ RRphylogeography(spec1="Ursus_arctos",
                  plot=FALSE,
                  mask_for_pred=NULL,
                  standardize=TRUE,
-                 output.dir='.')
+                 output.dir=yourdir)
 
 ```
 

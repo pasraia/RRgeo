@@ -504,21 +504,22 @@ temporal weights should be considered similar, making
 <li><code>standardize</code>: if <code>TRUE</code>, the output maps are
 rescaled between 0 and 1.</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;YOUR_DIRECTORY&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">RRphylogeography</span>(<span class="at">spec1=</span><span class="st">&quot;Ursus_arctos&quot;</span>, </span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                 <span class="at">spec2=</span><span class="st">&quot;Ursus_maritimus&quot;</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                 <span class="at">pred=</span>pred, </span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                 <span class="at">occs=</span>occs,</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                 <span class="at">aggr=</span><span class="dv">2</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                 <span class="at">time_col=</span><span class="st">&quot;TIME_factor&quot;</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                 <span class="at">kde_inversion=</span><span class="cn">FALSE</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                 <span class="at">resistance_map=</span><span class="cn">NULL</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                 <span class="at">clust=</span><span class="fl">0.5</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                 <span class="at">plot=</span><span class="cn">FALSE</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                 <span class="at">mask_for_pred=</span><span class="cn">NULL</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>                 <span class="at">standardize=</span><span class="cn">TRUE</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>                 <span class="at">output.dir=</span><span class="st">&#39;.&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>yourdir<span class="ot">&lt;-</span><span class="st">&quot;YOUR_DIRECTORY&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">setwd</span>(yourdir)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">RRphylogeography</span>(<span class="at">spec1=</span><span class="st">&quot;Ursus_arctos&quot;</span>, </span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                 <span class="at">spec2=</span><span class="st">&quot;Ursus_maritimus&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                 <span class="at">pred=</span>pred, </span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                 <span class="at">occs=</span>occs,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                 <span class="at">aggr=</span><span class="dv">2</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                 <span class="at">time_col=</span><span class="st">&quot;TIME_factor&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                 <span class="at">kde_inversion=</span><span class="cn">FALSE</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                 <span class="at">resistance_map=</span><span class="cn">NULL</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                 <span class="at">clust=</span><span class="fl">0.5</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                 <span class="at">plot=</span><span class="cn">FALSE</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>                 <span class="at">mask_for_pred=</span><span class="cn">NULL</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>                 <span class="at">standardize=</span><span class="cn">TRUE</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>                 <span class="at">output.dir=</span>yourdir)</span></code></pre></div>
 <p><strong>Important</strong>: The computational time of
 <code>RRphylogeography</code> is influenced by several factors,
 including the number of suitable cells for each target species, the

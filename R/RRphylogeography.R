@@ -64,18 +64,18 @@
 #'  history of past contacts between species. \emph{Methods in Ecology and
 #'  Evolution}, 16: 546-557. 10.1111/2041-210X.14478
 #'@examples
-#' \dontrun{
+#' \donttest{
 #'
 #' library(RRgeo)
 #' library(terra)
 #' library(sf)
 #'
-#' setwd("YOUR_DIRECTORY")
-#' getwd()->main.dir
+#' newwd<-tempdir()
+#' # newwd<-"YOUR_DIRECTORY"
 #'
 #' rast(system.file("exdata/U.arctos_suitability.tif", package="RRgeo"))->map1
 #' rast(system.file("exdata/U.maritimus_suitability.tif", package="RRgeo"))->map2
-#' load(system.file("exdata/Ursus_occurrences.RDa"), package="RRgeo"))
+#' load(system.file("exdata/Ursus_occurrences.Rda", package="RRgeo"))
 #' list(Ursus_arctos=map1,Ursus_maritimus=map2)->pred
 #' list(Ursus_arctos=occs_arctos,Ursus_maritimus=occs_marit)->occs
 #'
@@ -83,34 +83,34 @@
 #'                  spec2="Ursus_maritimus",
 #'                  pred=pred,
 #'                  occs=occs,
-#'                  aggr=2,
+#'                  aggr=5,
 #'                  time_col="TIME_factor",
 #'                  kde_inversion=FALSE,
 #'                  resistance_map=NULL,
-#'                  clust=0.5,
+#'                  clust=NULL,
 #'                  plot=FALSE,
 #'                  mask_for_pred=NULL,
+#'                  th=0.7,
 #'                  standardize=TRUE,
-#'                  output.dir=main.dir)
-#'
+#'                  output.dir=newwd)
 #'}
 
 
 
 RRphylogeography<-function(spec1,
-                     spec2,
-                     pred,
-                     occs,
-                     aggr=NULL,
-                     time_col=NULL,
-                     kde_inversion=FALSE,
-                     resistance_map=NULL,
-                     th=0.5,
-                     clust=0.5,
-                     plot=FALSE,
-                     mask_for_pred=NULL,
-                     standardize=TRUE,
-                     output.dir='.'){
+                           spec2,
+                           pred,
+                           occs,
+                           aggr=NULL,
+                           time_col=NULL,
+                           kde_inversion=FALSE,
+                           resistance_map=NULL,
+                           th=0.5,
+                           clust=0.5,
+                           plot=FALSE,
+                           mask_for_pred=NULL,
+                           standardize=TRUE,
+                           output.dir='.'){
 
   # require(scales)
   # require(sf)
@@ -250,45 +250,74 @@ RRphylogeography<-function(spec1,
         force_isotropy(tr_cor)->tr_cor
       }
 
+      if(!is.null(clust)){
+        makeCluster(detectCores()*clust)->cl
+        clusterEvalQ(cl,{
+          library(leastcostpath)
+          library(sf)
+          library(terra)
+        })
 
-      makeCluster(detectCores()*clust)->cl
-      clusterEvalQ(cl,{
-        library(leastcostpath)
-        library(sf)
-        library(terra)
-      })
+        prova3 <- pblapply(1:length(sp_tot1$cellID),
+                           function(x){
+                             pp1 <- suppressWarnings(create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
+                                               cost_distance = TRUE))
+                             gd <- st_length(pp1)
+                             kk <- data.frame(cellID1 = pp1$fromCell, cellID2 = pp1$toCell,
+                                              distance = as.numeric(1/gd), cost = pp1$cost)
 
-      prova3 <- pblapply(1:length(sp_tot1$cellID),
-                         function(x){
-                           print(x)
-                           pp1 <- create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
-                                             cost_distance = TRUE)
-                           gd <- st_length(pp1)
-                           kk <- data.frame(cellID1 = pp1$fromCell, cellID2 = pp1$toCell,
-                                            distance = as.numeric(1/gd), cost = pp1$cost)
+                             if(any(is.finite(kk$distance))) {
 
-                           if(any(is.finite(kk$distance))) {
+                               if (sp_tot1[x,]$cellID %in% sp_tot2$cellID) {
+                                 which(sp_tot1[x,]$cellID==sp_tot2$cellID)->q
+                                 kk[q,]$distance<-min(kk$distance[is.finite(kk$distance)],
+                                                      na.rm=TRUE)
+                                 kk[q,]$cost<-min(kk$cost,na.rm=TRUE)
+                               }
 
-                             if (sp_tot1[x,]$cellID %in% sp_tot2$cellID) {
-                               which(sp_tot1[x,]$cellID==sp_tot2$cellID)->q
-                               kk[q,]$distance<-min(kk$distance[is.finite(kk$distance)],
-                                                    na.rm=TRUE)
-                               kk[q,]$cost<-min(kk$cost,na.rm=TRUE)
-                             }
+                               if(sum(kk$distance=="Inf")>0){
+                                 which(kk$distance=="Inf")->l
+                                 kk[l,]$distance<-max(kk$distance[is.finite(kk$distance)],
+                                                      na.rm=TRUE)
+                                 kk[l,]$cost<-max(kk$cost,na.rm=TRUE)
+                               }
 
-                             if(sum(kk$distance=="Inf")>0){
-                               which(kk$distance=="Inf")->l
-                               kk[l,]$distance<-max(kk$distance[is.finite(kk$distance)],
-                                                    na.rm=TRUE)
-                               kk[l,]$cost<-max(kk$cost,na.rm=TRUE)
-                             }
+                             } else kk<-NULL
+                             kk
+                           },cl=cl)
+        stopCluster(cl)
+        closeAllConnections()
+        gc()
+      }else{
+        prova3 <- pblapply(1:length(sp_tot1$cellID),
+                           function(x){
+                             pp1 <- suppressWarnings(create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
+                                               cost_distance = TRUE))
+                             gd <- st_length(pp1)
+                             kk <- data.frame(cellID1 = pp1$fromCell, cellID2 = pp1$toCell,
+                                              distance = as.numeric(1/gd), cost = pp1$cost)
 
-                           } else kk<-NULL
-                           kk
-                         },cl=cl)
-      stopCluster(cl)
-      closeAllConnections()
-      gc()
+                             if(any(is.finite(kk$distance))) {
+
+                               if (sp_tot1[x,]$cellID %in% sp_tot2$cellID) {
+                                 which(sp_tot1[x,]$cellID==sp_tot2$cellID)->q
+                                 kk[q,]$distance<-min(kk$distance[is.finite(kk$distance)],
+                                                      na.rm=TRUE)
+                                 kk[q,]$cost<-min(kk$cost,na.rm=TRUE)
+                               }
+
+                               if(sum(kk$distance=="Inf")>0){
+                                 which(kk$distance=="Inf")->l
+                                 kk[l,]$distance<-max(kk$distance[is.finite(kk$distance)],
+                                                      na.rm=TRUE)
+                                 kk[l,]$cost<-max(kk$cost,na.rm=TRUE)
+                               }
+
+                             } else kk<-NULL
+                             kk
+                           })
+      }
+
 
       do.call(rbind,prova3)->D_mat
       D_mat$distance[D_mat$distance==1e-51]<-0
@@ -392,7 +421,7 @@ RRphylogeography<-function(spec1,
                          legend.position = "none")
 
         cowplot::plot_grid(p1,p2,ncol=2,align="hv")->pp
-        print(pp)
+        pp
       }
 
       writeRaster(res_tot[[2]],
@@ -416,7 +445,6 @@ RRphylogeography<-function(spec1,
 
 
   outcome<-lapply(1:nlyr(pred[[1]]), function(layer){
-    print(layer)
     RRphylogeo_inner(spec1,
                      spec2,
                      pred=lapply(pred, "[[", layer),

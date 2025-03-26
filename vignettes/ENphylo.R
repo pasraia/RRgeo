@@ -51,7 +51,8 @@ as.data.frame(map2,xy=T)->map2
 #  # datG<-lapply(grep(".gpkg",list.files(),value=TRUE),st_read)
 #  # names(datG)<-sapply(strsplit(grep(".gpkg",list.files(),value=TRUE),"_"),"[[",1)
 #  # dat<-lapply(datG,function(x) x[,c("OBS","age","bio1", "bio4", "bio11", "bio19")])
-#  setwd("YOUR_DIRECTORY")
+#  yourdir<-"YOUR_DIRECTORY"
+#  setwd(yourdir)
 #  load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
 #  read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 #  tree$tip.label<-gsub("_"," ",tree$tip.label)
@@ -78,7 +79,7 @@ head(dat[1])
 #                                  eval_threshold=0.7,
 #                                  output_options="best"),
 #                   clust=0.5,
-#                   output.dir='.')
+#                   output.dir=yourdir)
 #  
 
 ## ----raewtgqa, eval=FALSE-----------------------------------------------------
@@ -91,14 +92,14 @@ head(dat[1])
 #  project(newmap,st_crs(dat[[1]])$proj4string,res = 50000)->newmap
 #  
 #  
-#  getENphylo_results(input.dir ='.',
+#  getENphylo_results(input.dir =yourdir,
 #                     mods="all",
 #                     species_name=c("Vulpes velox","Ursus maritimus"))->mod
 #  
 #  ENphylo_prediction(object = mod,
 #                     newdata = newmap,
 #                     convert.to.suitability = TRUE,
-#                     output.dir='.',
+#                     output.dir=yourdir,
 #                     proj_name="proj_example")
 #  
 

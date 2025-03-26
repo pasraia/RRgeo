@@ -77,16 +77,16 @@ fix.coastal.points<-function (data,r, ncell, occ.desaggregation){
     }
     if (occ.desaggregation == FALSE)
       final2 <- final1
-    cat("\n", "initial sample size: ", init, sep = "")
-    cat("\n", "shifted points: ", sum(!is.na(test[, 1])),
+    message("\n", "initial sample size: ", init, sep = "")
+    message("\n", "shifted points: ", sum(!is.na(test[, 1])),
         sep = "")
-    cat("\n", "removed points: ", sum(is.na(test[, 1])),
+    message("\n", "removed points: ", sum(is.na(test[, 1])),
         sep = "")
     if (occ.desaggregation)
-      cat("\n", "removed duplicates: ", nrow(final1) -
+      message("\n", "removed duplicates: ", nrow(final1) -
             nrow(final2), sep = "")
-    cat("\n", "final sample size: ", nrow(final2), sep = "")
-    cat("\n")
+    message("\n", "final sample size: ", nrow(final2), sep = "")
+    message("\n")
 
     if(nrow(final2)>0)
       final2 <- st_as_sf(final2, coords = xy.cols, crs = crs_data) else

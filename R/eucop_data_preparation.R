@@ -89,20 +89,14 @@
 #'  climate database for conservation paleobiology based on eutherian mammals.
 #'  \emph{Scientific Data}, 12: 6. doi:10.1038/s41597-024-04181-4.
 #'@examples
-#' \dontrun{
-#' library(RRgeo)
+#' \donttest{
 #'
-#' setwd("YOUR_DIRECTORY")
-#' getwd()->main.dir
+#' newwd<-tempdir()
+#' # newwd<-"YOUR_DIRECTORY"
 #'
-#' species_vec<-c( "Canis latrans","Canis lupus","Gulo gulo","Lutra lutra",
-#'                 "Martes americana","Meles meles","Mustela erminea",
-#'                 "Mustela nivalis","Procyon lotor","Ursus arctos","Ursus ingressus",
-#'                 "Ursus maritimus","Ursus spelaeus","Vulpes velox","Vulpes vulpes" )
-#'
-#' eucop_data_preparation(input.dir=main.dir, species_name=species_vec,
-#'                        variables="bio", calibration=TRUE, combine.ages="mean",
-#'                        bk_points=list(),output.dir=main.dir)
+#' eucop_data_preparation(input.dir=newwd, species_name="Ursus ingressus",
+#'                        variables="bio",which.vars = "bio1", calibration=FALSE, combine.ages="mean",
+#'                        bk_points=NULL,output.dir=newwd)
 #'
 #'}
 
@@ -125,8 +119,7 @@ eucop_data_preparation<-function (input.dir,
           Raia, P. (2025). EutherianCoP. An integrated biotic and climate database
           for conservation paleobiology based on eutherian mammals.
           Scientific Data, 12: 6. doi:10.1038/s41597-024-04181-4.")
-  misspacks <- sapply(c("rnaturalearth", "rnaturalearthdata",
-                        "curl", "openxlsx"), requireNamespace, quietly = TRUE)
+  misspacks <- sapply(c("rnaturalearth","curl", "openxlsx"), requireNamespace, quietly = TRUE)
   if (any(!misspacks)) {
     stop("The following package/s are needed for this function to work, please install it/them:\n ",
          paste(names(misspacks)[which(!misspacks)], collapse = ", "),
@@ -205,7 +198,7 @@ eucop_data_preparation<-function (input.dir,
   spec <- spec[names(spec) %in% species_name]
   if (variables == "climveg" | variables == "all") {
     if (file.exists(paste0(input.dir, "/climveg.zip")))
-      print("climveg.zip file is already present in the input.dir folder") else
+      message("climveg.zip file is already present in the input.dir folder") else
         curl::curl_download("https://zenodo.org/records/14998748/files/climveg.zip?download=1",
                             destfile = paste0(input.dir, "/climveg.zip"), quiet = FALSE)
     utils::unzip(paste0(input.dir, "/climveg.zip"), exdir = file.path(input.dir,"climveg"))
@@ -224,7 +217,7 @@ eucop_data_preparation<-function (input.dir,
   }
   if (variables == "bio" | variables == "all") {
     if (file.exists(paste0(input.dir, "/bio.zip")))
-      print("bio.zip file is already present in the input.dir folder") else
+      message("bio.zip file is already present in the input.dir folder") else
         curl::curl_download("https://zenodo.org/records/14998748/files/bio.zip?download=1",
                             destfile = paste0(input.dir, "/bio.zip"), quiet = FALSE)
     utils::unzip(paste0(input.dir, "/bio.zip"), exdir = file.path(input.dir,"bio"))
@@ -343,13 +336,13 @@ eucop_data_preparation<-function (input.dir,
     rownames(all_species) <- NULL
     sp <- split(all_species, all_species$species)
     lapply(1:length(sp), function(jj) {
-      cat(paste("\n", "Formatting", unique(sp[[jj]]$species),
+      message(paste("\n", "Formatting", unique(sp[[jj]]$species),
                 "\n"))
       jjj2 <- st_as_sf(sp[[jj]], coords = c("longitude", "latitude"),
                        crs = 4326)
       jjj2 <- st_transform(jjj2,st_crs("ESRI:54009"))
       if (nrow(jjj2[!duplicated(jjj2$geometry),])<= 3) {
-        print(paste(unique(sp[[jj]]$species),"has too few occurrences for defining the study area. The species was skipped"))
+        message(paste(unique(sp[[jj]]$species),"has too few occurrences for defining the study area. The species was skipped"))
         return(NULL)
       }
       pol <- st_convex_hull(st_union(jjj2))
@@ -514,7 +507,7 @@ eucop_data_preparation<-function (input.dir,
     rownames(all_species) <- NULL
     sp <- split(all_species, all_species$species)
     all_species <- lapply(1:length(sp), function(jj) {
-      cat(paste("\n", "Formatting", unique(sp[[jj]]$species),
+      message(paste("\n", "Formatting", unique(sp[[jj]]$species),
                 "\n"))
       jjj2 <- st_as_sf(sp[[jj]], coords = c("longitude", "latitude"),
                        crs = 4326)

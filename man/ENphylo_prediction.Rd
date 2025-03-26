@@ -66,14 +66,16 @@ library(terra)
 library(sf)
 library(RRgeo)
 
-setwd("YOUR_DIRECTORY")
-load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
+newwd<-tempdir()
+# newwd<-"YOUR_DIRECTORY"
+
+load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"),)
 read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 tree$tip.label<-gsub("_"," ",tree$tip.label)
 
 curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
-                    destfile = "X35kya.tif", quiet = FALSE)
-rast("X35kya.tif")->map35
+                    destfile = file.path(newwd,"X35kya.tif"), quiet = FALSE)
+rast(file.path(newwd,"X35kya.tif"))->map35
 project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 
 ENphylo_modeling(input_data=dat,
@@ -89,10 +91,10 @@ ENphylo_modeling(input_data=dat,
                                 eval_threshold=0.7,
                                 output_options="best"),
                  clust=0.5,
-                 output.dir='.')
+                 output.dir=newwd)
 
 
-getENphylo_results(input.dir ='.',
+getENphylo_results(input.dir =newwd,
                    mods="all",
                    species_name=c("Vulpes velox","Ursus maritimus"))->mod
 
@@ -108,7 +110,7 @@ project(newmap,st_crs(dat[[1]])$proj4string,res = 50000)->newmap
 ENphylo_prediction(object = mod,
                    newdata = newmap,
                    convert.to.suitability = TRUE,
-                   output.dir='.',
+                   output.dir=newwd,
                    proj_name="proj_example")
 }
 }

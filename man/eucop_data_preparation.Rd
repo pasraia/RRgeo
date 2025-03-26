@@ -95,20 +95,14 @@ Additionally, if \code{bk_points} is not \code{NULL}, the ages of
  paleoclimatic/vegetational or bioclimatic data.
 }
 \examples{
-\dontrun{
-library(RRgeo)
+\donttest{
 
-setwd("YOUR_DIRECTORY")
-getwd()->main.dir
+newwd<-tempdir()
+# newwd<-"YOUR_DIRECTORY"
 
-species_vec<-c( "Canis latrans","Canis lupus","Gulo gulo","Lutra lutra",
-                "Martes americana","Meles meles","Mustela erminea",
-                "Mustela nivalis","Procyon lotor","Ursus arctos","Ursus ingressus",
-                "Ursus maritimus","Ursus spelaeus","Vulpes velox","Vulpes vulpes" )
-
-eucop_data_preparation(input.dir=main.dir, species_name=species_vec,
-                       variables="bio", calibration=TRUE, combine.ages="mean",
-                       bk_points=list(),output.dir=main.dir)
+eucop_data_preparation(input.dir=newwd, species_name="Ursus ingressus",
+                       variables="bio",which.vars = "bio1", calibration=FALSE, combine.ages="mean",
+                       bk_points=NULL,output.dir=newwd)
 
 }
 }

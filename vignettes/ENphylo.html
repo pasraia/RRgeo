@@ -402,10 +402,11 @@ chunk.</p>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># datG&lt;-lapply(grep(&quot;.gpkg&quot;,list.files(),value=TRUE),st_read)</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># names(datG)&lt;-sapply(strsplit(grep(&quot;.gpkg&quot;,list.files(),value=TRUE),&quot;_&quot;),&quot;[[&quot;,1)</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># dat&lt;-lapply(datG,function(x) x[,c(&quot;OBS&quot;,&quot;age&quot;,&quot;bio1&quot;, &quot;bio4&quot;, &quot;bio11&quot;, &quot;bio19&quot;)])</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;YOUR_DIRECTORY&quot;</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">&quot;https://zenodo.org/records/14998748/files/dat.Rda?download=1&quot;</span>))</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">read.tree</span>(<span class="fu">system.file</span>(<span class="st">&quot;exdata/Eucopdata_tree.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;RRgeo&quot;</span>))<span class="ot">-&gt;</span>tree</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>tree<span class="sc">$</span>tip.label<span class="ot">&lt;-</span><span class="fu">gsub</span>(<span class="st">&quot;_&quot;</span>,<span class="st">&quot; &quot;</span>,tree<span class="sc">$</span>tip.label)</span></code></pre></div>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>yourdir<span class="ot">&lt;-</span><span class="st">&quot;YOUR_DIRECTORY&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">setwd</span>(yourdir)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">url</span>(<span class="st">&quot;https://zenodo.org/records/14998748/files/dat.Rda?download=1&quot;</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">read.tree</span>(<span class="fu">system.file</span>(<span class="st">&quot;exdata/Eucopdata_tree.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;RRgeo&quot;</span>))<span class="ot">-&gt;</span>tree</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>tree<span class="sc">$</span>tip.label<span class="ot">&lt;-</span><span class="fu">gsub</span>(<span class="st">&quot;_&quot;</span>,<span class="st">&quot; &quot;</span>,tree<span class="sc">$</span>tip.label)</span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">head</span>(dat[<span class="dv">1</span>])</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; $`Canis latrans`</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 52630 features and 6 fields</span></span>
@@ -496,7 +497,7 @@ trees.</p>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>                                <span class="at">eval_threshold=</span><span class="fl">0.7</span>,</span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>                                <span class="at">output_options=</span><span class="st">&quot;best&quot;</span>),</span>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>                 <span class="at">clust=</span><span class="fl">0.5</span>, </span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>                 <span class="at">output.dir=</span><span class="st">&#39;.&#39;</span>)</span></code></pre></div>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>                 <span class="at">output.dir=</span>yourdir)</span></code></pre></div>
 <div id="output" class="section level3">
 <h3><code>ENphylo_modeling</code> outputs</h3>
 <p><code>ENphylo_modeling</code> creates two output folders within the
@@ -567,14 +568,14 @@ predictions.</p>
 <span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">project</span>(newmap,<span class="fu">st_crs</span>(dat[[<span class="dv">1</span>]])<span class="sc">$</span>proj4string,<span class="at">res =</span> <span class="dv">50000</span>)<span class="ot">-&gt;</span>newmap</span>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">getENphylo_results</span>(<span class="at">input.dir =</span><span class="st">&#39;.&#39;</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">getENphylo_results</span>(<span class="at">input.dir =</span>yourdir,</span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>                   <span class="at">mods=</span><span class="st">&quot;all&quot;</span>,</span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>                   <span class="at">species_name=</span><span class="fu">c</span>(<span class="st">&quot;Vulpes velox&quot;</span>,<span class="st">&quot;Ursus maritimus&quot;</span>))<span class="ot">-&gt;</span>mod</span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">ENphylo_prediction</span>(<span class="at">object =</span> mod, </span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>                   <span class="at">newdata =</span> newmap,</span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>                   <span class="at">convert.to.suitability =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>                   <span class="at">output.dir=</span><span class="st">&#39;.&#39;</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>                   <span class="at">output.dir=</span>yourdir,</span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>                   <span class="at">proj_name=</span><span class="st">&quot;proj_example&quot;</span>)</span></code></pre></div>
 <p>In the following chunk we show how to plot habitat suitibility maps
 of the selected species by means of ggplot2. Such maps are provided as

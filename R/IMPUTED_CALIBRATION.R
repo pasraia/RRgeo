@@ -118,7 +118,7 @@ IMPUTED_CALIBRATION<-function(ENFA_output,
     c(list(call = "calibrated_imputed"), list(co = f))
   })
   if(evaluate) {
-    cat(paste("\n", "EVALUATING IMPUTATION", "\n"))
+    message(paste("\n", "EVALUATING IMPUTATION", "\n"))
     tt <- ENFA_output[match(names(output), names(ENFA_output))]
     tt <- mapply(function(xx, yy) {
       yy$calibrated_model$co <- xx$co

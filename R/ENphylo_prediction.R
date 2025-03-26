@@ -69,14 +69,16 @@
 #' library(sf)
 #' library(RRgeo)
 #'
-#' setwd("YOUR_DIRECTORY")
-#' load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
+#' newwd<-tempdir()
+#' # newwd<-"YOUR_DIRECTORY"
+#'
+#' load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"),)
 #' read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 #' tree$tip.label<-gsub("_"," ",tree$tip.label)
 #'
 #' curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
-#'                     destfile = "X35kya.tif", quiet = FALSE)
-#' rast("X35kya.tif")->map35
+#'                     destfile = file.path(newwd,"X35kya.tif"), quiet = FALSE)
+#' rast(file.path(newwd,"X35kya.tif"))->map35
 #' project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 #'
 #' ENphylo_modeling(input_data=dat,
@@ -92,10 +94,10 @@
 #'                                 eval_threshold=0.7,
 #'                                 output_options="best"),
 #'                  clust=0.5,
-#'                  output.dir='.')
+#'                  output.dir=newwd)
 #'
 #'
-#' getENphylo_results(input.dir ='.',
+#' getENphylo_results(input.dir =newwd,
 #'                    mods="all",
 #'                    species_name=c("Vulpes velox","Ursus maritimus"))->mod
 #'
@@ -111,7 +113,7 @@
 #' ENphylo_prediction(object = mod,
 #'                    newdata = newmap,
 #'                    convert.to.suitability = TRUE,
-#'                    output.dir='.',
+#'                    output.dir=newwd,
 #'                    proj_name="proj_example")
 #'}
 
@@ -174,7 +176,7 @@ ENphylo_prediction<-function (object,
     }
     ras <- list(call = "enfa_prediction", enfa_prediction = ras)
   }else {
-    cat(paste("\n", "PREDICTING ENFA/IMPUTATION", "\n"))
+    message(paste("\n", "PREDICTING ENFA/IMPUTATION", "\n"))
     ras <- pblapply(object, function(ob) {
       if (ob$call == "calibrated_enfa") {
         U <- ob$calibrated_model$full_model$co
@@ -245,26 +247,45 @@ ENphylo_prediction<-function (object,
       }
       return(ras)
     })
-    setwd(output.dir)
-    suppressWarnings({dir.create("ENphylo_prediction")})
+    #setwd(output.dir)
+    # suppressWarnings({dir.create("ENphylo_prediction")})
+    ENout.dir<-file.path(output.dir,"ENphylo_prediction")
+    dir.create(ENout.dir,showWarnings = FALSE)
     lapply(1:length(ras), function(xx) {
+      dir.create(file.path(ENout.dir, names(ras)[xx],
+                           proj_name), recursive = TRUE)
       if (ras[[xx]]$call == "imputed_prediction") {
-        dir.create(paste0("ENphylo_prediction/", names(ras)[xx],
-                          "/", proj_name), recursive = TRUE)
+        # dir.create(paste0("ENphylo_prediction/", names(ras)[xx],
+        #                   "/", proj_name), recursive = TRUE)
+        # lapply(1:length(ras[[xx]]$imputed_prediction),function(jj){
+        #   writeRaster(ras[[xx]]$imputed_prediction[[jj]],
+        #               file.path("ENphylo_prediction", names(ras)[xx],
+        #                         proj_name,paste0(names(ras[[xx]]$imputed_prediction)[jj],
+        #                                          ".tif")), overwrite = TRUE)
+        # })
+
 
         lapply(1:length(ras[[xx]]$imputed_prediction),function(jj){
           writeRaster(ras[[xx]]$imputed_prediction[[jj]],
-                      file.path("ENphylo_prediction", names(ras)[xx],
+                      file.path(ENout.dir, names(ras)[xx],
                                 proj_name,paste0(names(ras[[xx]]$imputed_prediction)[jj],
                                                  ".tif")), overwrite = TRUE)
         })
       }
       if (ras[[xx]]$call == "enfa_prediction") {
-        dir.create(paste0("ENphylo_prediction/", names(ras)[xx],
-                          "/", proj_name), recursive = TRUE)
+        # dir.create(paste0("ENphylo_prediction/", names(ras)[xx],
+        #                   "/", proj_name), recursive = TRUE)
+        # lapply(1:nlyr(ras[[xx]]$enfa_prediction), function(jj) {
+        #   writeRaster(ras[[xx]]$enfa_prediction[[jj]],
+        #               file.path("ENphylo_prediction", names(ras)[xx],
+        #                         proj_name, paste0(names(ras[[xx]]$enfa_prediction[[jj]]),
+        #                                           ".tif")), overwrite = TRUE)
+        # })
+        # dir.create(file.path(ENout.dir, names(ras)[xx],
+        #                      proj_name), recursive = TRUE)
         lapply(1:nlyr(ras[[xx]]$enfa_prediction), function(jj) {
           writeRaster(ras[[xx]]$enfa_prediction[[jj]],
-                      file.path("ENphylo_prediction", names(ras)[xx],
+                      file.path(ENout.dir, names(ras)[xx],
                                 proj_name, paste0(names(ras[[xx]]$enfa_prediction[[jj]]),
                                                   ".tif")), overwrite = TRUE)
         })
@@ -272,11 +293,11 @@ ENphylo_prediction<-function (object,
     })
   }
   if (convert.to.suitability) {
-    cat(paste("\n", "CONVERTING PREDICTED VALUES TO SUITABILITY",
+    message(paste("\n", "CONVERTING PREDICTED VALUES TO SUITABILITY",
               "\n"))
     reference <- as.data.frame(x)
     ras_suitability <- pblapply(names(object), function(sp) {
-      cat(paste("\n", sp, "\n"))
+      message(paste("\n", sp, "\n"))
       mydata <- object[[sp]]$formatted_data
       obs_col <- mydata$obs_col
       time_col <- mydata$time_col
@@ -458,7 +479,7 @@ ENphylo_prediction<-function (object,
       if (ras[[xx]]$call == "imputed_prediction") {
         good <- grep("Suitability|Binary", names(ras[[xx]][[2]]))
         lapply(good, function(jj) {
-          writeRaster(ras[[xx]][[2]][[jj]], file.path("ENphylo_prediction",
+          writeRaster(ras[[xx]][[2]][[jj]], file.path(ENout.dir,
                                                       names(ras)[xx],
                                                       proj_name,
                                                       paste0(names(ras[[xx]][[2]])[jj],
@@ -468,7 +489,7 @@ ENphylo_prediction<-function (object,
       if (ras[[xx]]$call == "enfa_prediction") {
         good <- grep("Suitability|Binary", names(ras[[xx]][[2]]))
         lapply(good, function(jj) {
-          writeRaster(ras[[xx]][[2]][[jj]], file.path("ENphylo_prediction",
+          writeRaster(ras[[xx]][[2]][[jj]], file.path(ENout.dir,
                                                       names(ras)[xx], proj_name, paste0(names(ras[[xx]][[2]])[[jj]],
                                                                                         ".tif")), overwrite = TRUE)
         })

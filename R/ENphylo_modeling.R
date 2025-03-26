@@ -177,22 +177,24 @@
 #'  method to model the distribution of extremely rare species. \emph{Methods in
 #'  Ecology and Evolution}, 14: 911-922. doi:10.1111/2041-210X.14066
 #'@examples
-#' \dontrun{
-#'  library(ape)
-#'  library(terra)
-#'  library(sf)
-#'  library(RRgeo)
+#' \donttest{
+#' library(ape)
+#' library(terra)
+#' library(sf)
+#' library(RRgeo)
 #'
-#' setwd("YOUR_DIRECTORY")
+#' newwd<-tempdir()
+#' # newwd<-"YOUR_DIRECTORY"
+#'
 #' load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
 #' read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 #' tree$tip.label<-gsub("_"," ",tree$tip.label)
 #' curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
-#'                     destfile = "X35kya.tif", quiet = FALSE)
-#' rast("X35kya.tif")->map35
+#'                     destfile = file.path(newwd,"X35kya.tif"), quiet = FALSE)
+#' rast(file.path(newwd,"X35kya.tif"))->map35
 #' project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 #'
-#' ENphylo_modeling(input_data=dat,
+#' ENphylo_modeling(input_data=dat[c(1,11)],
 #'                  tree=tree,
 #'                  input_mask=map[[1]],
 #'                  obs_col="OBS",
@@ -200,12 +202,12 @@
 #'                  min_occ_enfa=15,
 #'                  boot_test_perc=20,
 #'                  boot_reps=10,
-#'                  swap.args=list(nsim=10,si=0.2,si2=0.2),
+#'                  swap.args=list(nsim=5,si=0.2,si2=0.2),
 #'                  eval.args=list(eval_metric_for_imputation="AUC",
 #'                                 eval_threshold=0.7,
 #'                                 output_options="best"),
-#'                  clust=0.5,
-#'                  output.dir='.')
+#'                  clust=NULL,
+#'                  output.dir=newwd)
 #'
 #'}
 
@@ -254,7 +256,7 @@ ENphylo_modeling<-function (input_data,
     add_data <- input_data[sapply(input_data, function(xx) class(xx)[1] !=
                                     "sf")]
     all_models <- mapply(function(data, nam) {
-      cat(paste("\n", "Modelling", nam, "with ENFA", "\n"))
+      message(paste("\n", "Modelling", nam, "with ENFA", "\n"))
       if (is.null(time_col)) {
         prova <- subset(data, as.data.frame(data)[, obs_col] ==
                           0)
@@ -278,11 +280,11 @@ ENphylo_modeling<-function (input_data,
         mymodel <- ENFA_CALIBRATION(formatted_data = mydata,
                                     boot_test_perc = boot_test_perc, boot_reps = boot_reps,
                                     sig_axes_selection = "brStick", clust = clust)
-        cat(paste("\n", "Modelling", nam, "with ENFA: done.",
+        message(paste("\n", "Modelling", nam, "with ENFA: done.",
                   "\n"))
       } else {
         mymodel = NULL
-        cat(paste("\n", "Modelling", nam, "with ENFA: skipped.",
+        message(paste("\n", "Modelling", nam, "with ENFA: skipped.",
                   "\n"))
       }
       return(list(call = "calibrated_enfa", formatted_data = mydata,
@@ -311,7 +313,7 @@ ENphylo_modeling<-function (input_data,
     }
     if (all(sapply(all_models, function(k) !is.null(k$calibrated_model)) ==
             TRUE)) {
-      print("All species are modelled with ENFA")
+      message("All species are modelled with ENFA")
 
       lapply(1:length(all_models), function(bb) {
         model_outputs <- all_models[bb]
@@ -349,7 +351,7 @@ ENphylo_modeling<-function (input_data,
           save(model_outputs, file = paste0(output.dir, "/ENphylo_enfa_models/",
                                             names(model_outputs), "/model_outputs.RData"))
         })
-        print("Phylogenetic imputation is unfeasible, too few species. All species are modelled with ENFA")
+        message("Phylogenetic imputation is unfeasible, too few species. All species are modelled with ENFA")
       }else {
 
         if (length(all_out) > length(all_good) * 0.3) {
@@ -358,7 +360,7 @@ ENphylo_modeling<-function (input_data,
                  impa=tree$tip.label[tree$tip.label%in%names(all_out)],
                  imp.max=0.3)$trees->treeX
 
-          print(paste0("Since more than 30% of the total species have to be modelled with phylogenetic imputation, the phylogenetic tree was split in ",
+          message(paste0("Since more than 30% of the total species have to be modelled with phylogenetic imputation, the phylogenetic tree was split in ",
                        length(treeX), " different phylogenies"))
         }else treeX <- list(tree)
 
