@@ -53,7 +53,9 @@ as.data.frame(map2,xy=T)->map2
 #  # dat<-lapply(datG,function(x) x[,c("OBS","age","bio1", "bio4", "bio11", "bio19")])
 #  yourdir<-"YOUR_DIRECTORY"
 #  setwd(yourdir)
-#  load(url("https://zenodo.org/records/14998748/files/dat.Rda?download=1"))
+#  
+#  latesturl<-RRgeo:::get_latest_version("12734585")
+#  load(url(paste0(latesturl,"/files/dat.Rda?download=1")))
 #  read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 #  tree$tip.label<-gsub("_"," ",tree$tip.label)
 
@@ -61,7 +63,8 @@ as.data.frame(map2,xy=T)->map2
 head(dat[1])
 
 ## ----enmod, eval=FALSE--------------------------------------------------------
-#  curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+#  latesturl<-RRgeo:::get_latest_version("12734585")
+#  curl::curl_download(paste0(latesturl,"/files/X35kya.tif?download=1"),
 #                      destfile = "X35kya.tif", quiet = FALSE)
 #  rast("X35kya.tif")->map35
 #  project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map

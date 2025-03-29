@@ -5,7 +5,7 @@
 #'  appropriate calibration curve based on the latitude associated with each
 #'  occurrence and the nature of the sample (i.e marine or terrestrial samples).
 #'@usage cal14C(dataset,age=NULL,uncertainty=NULL,latitude=NULL,domain=NULL,
-#'  bounds=c(0.025,0.975), clust=0.5, save=TRUE, output.dir=".")
+#'  bounds=c(0.025,0.975), clust=0.5, save=TRUE, output.dir=NULL)
 #'@param dataset a \code{data.frame} containing all the occurrences to be
 #'  calibrated.
 #'@param age character. Name of the column in \code{dataset} containing the
@@ -71,7 +71,7 @@ cal14C<-function (dataset,
                       bounds = c(0.025, 0.975),
                       clust = 0.5,
                       save = TRUE,
-                      output.dir = "."){
+                      output.dir = NULL){
   if (!requireNamespace("Bchron", quietly = TRUE))
     stop("Package \"Bchron\" needed for this function to work, please install it.",
          call. = FALSE)
@@ -79,6 +79,8 @@ cal14C<-function (dataset,
     stop("Package \"openxlsx\" needed for save=TRUE. Please install it.",
          call. = FALSE)
   }
+  if(save&is.null(output.dir))  stop("Under save=TRUE, the output.dir is required.")
+
   dat <- dataset
   dat$ID <- seq(1:length(dat[, 1]))
   if (!is.null(age))

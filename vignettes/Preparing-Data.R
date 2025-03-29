@@ -99,8 +99,9 @@ plot(p2)
 plot(p3)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
-#                     destfile = "X35kya.tif", quiet = FALSE)
+#  latesturl<-RRgeo:::get_latest_version("12734585")
+#  curl::curl_download(paste0(latesturl,"/files/X35kya.tif?download=1"),
+#                      destfile = "X35kya.tif", quiet = FALSE)
 #  rast("X35kya.tif")->map35
 #  map35[[1]]->map
 

@@ -10,7 +10,7 @@
 #'@usage
 #'eucop_data_preparation(input.dir,species_name,variables="all",which.vars=NULL,
 #'calibration=FALSE,add.modern.occs=FALSE,
-#'combine.ages=NULL,remove.duplicates=TRUE, bk_points=NULL,output.dir=".")
+#'combine.ages=NULL,remove.duplicates=TRUE, bk_points=NULL,output.dir)
 #'@param input.dir the file path wherein EutherianCop mammal occurrences and
 #'  paleoclimatic data are to be stored.
 #'@param species_name character. The name of the single (or multiple) species
@@ -111,7 +111,7 @@ eucop_data_preparation<-function (input.dir,
                                   combine.ages = NULL,
                                   remove.duplicates = TRUE,
                                   bk_points = NULL,
-                                  output.dir = ".")
+                                  output.dir)
 {
   message("Please cite:
           Mondanaro, A., Girardi, G., Castiglione, S., Timmermann, A., Zeller, E.,
@@ -119,7 +119,7 @@ eucop_data_preparation<-function (input.dir,
           Raia, P. (2025). EutherianCoP. An integrated biotic and climate database
           for conservation paleobiology based on eutherian mammals.
           Scientific Data, 12: 6. doi:10.1038/s41597-024-04181-4.")
-  misspacks <- sapply(c("rnaturalearth","curl", "openxlsx"), requireNamespace, quietly = TRUE)
+  misspacks <- sapply(c("rnaturalearth","curl", "openxlsx","httr","jsonlite"), requireNamespace, quietly = TRUE)
   if (any(!misspacks)) {
     stop("The following package/s are needed for this function to work, please install it/them:\n ",
          paste(names(misspacks)[which(!misspacks)], collapse = ", "),
@@ -176,7 +176,8 @@ eucop_data_preparation<-function (input.dir,
     }else which.vars <- c(var_av, biovar)
   }
 
-  curl::curl_download(url = "https://zenodo.org/records/14009105/files/1%20Raw%20occurrence%20data.xlsx?download=1",
+  latesturl1<-get_latest_version("13169678")
+  curl::curl_download(url = paste0(latesturl1,"/files/1%20Raw%20occurrence%20data.xlsx?download=1"),
                       destfile = paste0(input.dir, "/raw_data.xlsx"))
   occs <- openxlsx::read.xlsx(paste0(input.dir, "/raw_data.xlsx"),
                               sheet = 1)
@@ -198,9 +199,13 @@ eucop_data_preparation<-function (input.dir,
   spec <- spec[names(spec) %in% species_name]
   if (variables == "climveg" | variables == "all") {
     if (file.exists(paste0(input.dir, "/climveg.zip")))
-      message("climveg.zip file is already present in the input.dir folder") else
-        curl::curl_download("https://zenodo.org/records/14998748/files/climveg.zip?download=1",
+      message("climveg.zip file is already present in the input.dir folder") else{
+        latesturl2<-get_latest_version("12734585")
+        curl::curl_download(url = paste0(latesturl2,"/files/climveg.zip?download=1"),
                             destfile = paste0(input.dir, "/climveg.zip"), quiet = FALSE)
+      }
+        # curl::curl_download("https://zenodo.org/records/14998748/files/climveg.zip?download=1",
+        #                     destfile = paste0(input.dir, "/climveg.zip"), quiet = FALSE)
     utils::unzip(paste0(input.dir, "/climveg.zip"), exdir = file.path(input.dir,"climveg"))
     nn <- paste0("X", seq(0, 130, 1), "kya")
     vv_bio <- list.files(paste0(input.dir, "/climveg"), full.names = TRUE,
@@ -217,9 +222,13 @@ eucop_data_preparation<-function (input.dir,
   }
   if (variables == "bio" | variables == "all") {
     if (file.exists(paste0(input.dir, "/bio.zip")))
-      message("bio.zip file is already present in the input.dir folder") else
-        curl::curl_download("https://zenodo.org/records/14998748/files/bio.zip?download=1",
-                            destfile = paste0(input.dir, "/bio.zip"), quiet = FALSE)
+      message("bio.zip file is already present in the input.dir folder") else{
+          latesturl2<-get_latest_version("12734585")
+          curl::curl_download(url = paste0(latesturl2,"/files/bio.zip?download=1"),
+                              destfile = paste0(input.dir, "/bio.zip"), quiet = FALSE)
+        }
+        # curl::curl_download("https://zenodo.org/records/14998748/files/bio.zip?download=1",
+        #                     destfile = paste0(input.dir, "/bio.zip"), quiet = FALSE)
     utils::unzip(paste0(input.dir, "/bio.zip"), exdir = file.path(input.dir,"bio"))
     nn <- paste0("X", seq(0, 130, 1), "kya")
     vv_bio <- list.files(paste0(input.dir, "/bio"), full.names = TRUE,

@@ -221,3 +221,17 @@ ENtree<-function(tree,impa,imp.max=0.3,mts=100,mints=10){
       return(list(trees=treeX))
   }
 }
+
+get_latest_version<-function(concept_doi_number){
+  api_url <- paste0("https://zenodo.org/api/records/",concept_doi_number)
+  api_response <- httr::GET(api_url)
+  api_data <- httr::content(api_response, "text", encoding = "UTF-8")
+  api_parsed <- jsonlite::fromJSON(api_data)
+  response <- httr::GET(api_parsed$links$versions)
+
+  data <- httr::content(response, "text", encoding = "UTF-8")
+  parsed_data <- jsonlite::fromJSON(data)
+
+  datetime<-strptime(gsub("T"," ",parsed_data$hits$hits$updated),format = "%Y-%m-%d %H:%M:%S",tz = 'GMT')
+  parsed_data$hits$hits$links$self_html[which(datetime==max(datetime))]
+}

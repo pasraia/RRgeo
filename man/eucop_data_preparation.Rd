@@ -6,7 +6,7 @@
 \usage{
 eucop_data_preparation(input.dir,species_name,variables="all",which.vars=NULL,
 calibration=FALSE,add.modern.occs=FALSE,
-combine.ages=NULL,remove.duplicates=TRUE, bk_points=NULL,output.dir=".")
+combine.ages=NULL,remove.duplicates=TRUE, bk_points=NULL,output.dir)
 }
 \arguments{
 \item{input.dir}{the file path wherein EutherianCop mammal occurrences and

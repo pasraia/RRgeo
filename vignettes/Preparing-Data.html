@@ -541,10 +541,11 @@ In the chunk below, we used the map of a random “bio” variable at 35 kyr
 as a geographical mask to plot the density map, after converting it by
 using the extent and the coordinate raster system (crs) of the
 background area.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>curl<span class="sc">::</span><span class="fu">curl_download</span>(<span class="st">&quot;https://zenodo.org/records/14998748/files/X35kya.tif?download=1&quot;</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                   <span class="at">destfile =</span> <span class="st">&quot;X35kya.tif&quot;</span>, <span class="at">quiet =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">rast</span>(<span class="st">&quot;X35kya.tif&quot;</span>)<span class="ot">-&gt;</span>map35</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>map35[[<span class="dv">1</span>]]<span class="ot">-&gt;</span>map</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>latesturl<span class="ot">&lt;-</span>RRgeo<span class="sc">:::</span><span class="fu">get_latest_version</span>(<span class="st">&quot;12734585&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>curl<span class="sc">::</span><span class="fu">curl_download</span>(<span class="fu">paste0</span>(latesturl,<span class="st">&quot;/files/X35kya.tif?download=1&quot;</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                    <span class="at">destfile =</span> <span class="st">&quot;X35kya.tif&quot;</span>, <span class="at">quiet =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">rast</span>(<span class="st">&quot;X35kya.tif&quot;</span>)<span class="ot">-&gt;</span>map35</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>map35[[<span class="dv">1</span>]]<span class="ot">-&gt;</span>map</span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">project</span>(map,<span class="fu">st_crs</span>(pol_with_buffer)<span class="sc">$</span>proj4string,<span class="at">res =</span> <span class="dv">50000</span>)<span class="ot">-&gt;</span>map</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">mask</span>(<span class="fu">crop</span>(map,<span class="fu">vect</span>(pol_with_buffer)),<span class="fu">vect</span>(pol_with_buffer))<span class="ot">-&gt;</span>map</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>RRgeo<span class="sc">:::</span><span class="fu">density_background</span>(<span class="at">pres.locs=</span>occs, <span class="at">MASK=</span>map, <span class="at">rm.pres=</span><span class="cn">TRUE</span>)<span class="ot">-&gt;</span>dens.ras</span>

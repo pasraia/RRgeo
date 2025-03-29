@@ -95,6 +95,6 @@ bibentry(bibtype        = "Article",
          doi          = "10.1111/2041-210X.14478",
          textVersion  = paste("Mondanaro, A., Castiglione, S., Di Febbraro, M., Timmermann, A., Girardi, G., Melchionna, M., Serio, C., Belfiore, A.M., & Raia, P. (2025).",
                               "RRphylogeography: A new method to find the area of origin of species and the history of past contacts between species.",
-                              "Methods in Ecology and Evolution",
+                              "Methods in Ecology and Evolution, 16: 546-557.",
                               "doi: 10.1111/2041-210X.14478")
 )

@@ -6,7 +6,7 @@
  time interval}
 \usage{
 ENphylo_prediction(object, newdata,
- convert.to.suitability=FALSE,output.dir='.',proj_name="outputs")
+ convert.to.suitability=FALSE,output.dir,proj_name="outputs")
 }
 \arguments{
 \item{object}{a \code{list} of ENFA and ENphylo models.  Each element of the
@@ -60,7 +60,7 @@ If \code{convert.to.suitability} is set as \code{TRUE},
  Moisen, 2008}).
 }
 \examples{
-\dontrun{
+\donttest{
 library(ape)
 library(terra)
 library(sf)
@@ -69,18 +69,18 @@ library(RRgeo)
 newwd<-tempdir()
 # newwd<-"YOUR_DIRECTORY"
 
-curl::curl_download("https://zenodo.org/records/14998748/files/dat.Rda?download=1",
+latesturl<-RRgeo:::get_latest_version("12734585")
+curl::curl_download(url = paste0(latesturl,"/files/dat.Rda?download=1"),
                     destfile = file.path(newwd,"dat.Rda"), quiet = FALSE)
 load(file.path(newwd,"dat.Rda"))
 read.tree(system.file("exdata/Eucopdata_tree.txt", package="RRgeo"))->tree
 tree$tip.label<-gsub("_"," ",tree$tip.label)
-
-curl::curl_download("https://zenodo.org/records/14998748/files/X35kya.tif?download=1",
+curl::curl_download(paste0(latesturl,"/files/X35kya.tif?download=1"),
                     destfile = file.path(newwd,"X35kya.tif"), quiet = FALSE)
 rast(file.path(newwd,"X35kya.tif"))->map35
 project(map35,st_crs(dat[[1]])$proj4string,res = 50000)->map
 
-ENphylo_modeling(input_data=dat,
+ENphylo_modeling(input_data=dat[c(1,11)],
                  tree=tree,
                  input_mask=map[[1]],
                  obs_col="OBS",
@@ -88,17 +88,17 @@ ENphylo_modeling(input_data=dat,
                  min_occ_enfa=15,
                  boot_test_perc=20,
                  boot_reps=10,
-                 swap.args=list(nsim=10,si=0.2,si2=0.2),
+                 swap.args=list(nsim=5,si=0.2,si2=0.2),
                  eval.args=list(eval_metric_for_imputation="AUC",
                                 eval_threshold=0.7,
                                 output_options="best"),
-                 clust=0.5,
+                 clust=NULL,
                  output.dir=newwd)
 
 
 getENphylo_results(input.dir =newwd,
                    mods="all",
-                   species_name=c("Vulpes velox","Ursus maritimus"))->mod
+                   species_name=names(dat)[c(1,11)])->mod
 
 
 library(rnaturalearth)

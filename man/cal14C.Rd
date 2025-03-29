@@ -5,7 +5,7 @@
 \title{Radiocarbon Calibration of Occurrences}
 \usage{
 cal14C(dataset,age=NULL,uncertainty=NULL,latitude=NULL,domain=NULL,
- bounds=c(0.025,0.975), clust=0.5, save=TRUE, output.dir=".")
+ bounds=c(0.025,0.975), clust=0.5, save=TRUE, output.dir=NULL)
 }
 \arguments{
 \item{dataset}{a \code{data.frame} containing all the occurrences to be

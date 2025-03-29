@@ -6,7 +6,7 @@
 \usage{
 RRphylogeography(spec1,spec2,pred,occs,aggr=NULL,time_col=NULL,
  kde_inversion=FALSE,resistance_map=NULL,th=0.5,clust=0.5,plot=FALSE,
- mask_for_pred=NULL,standardize=TRUE,output.dir='.')
+ mask_for_pred=NULL,standardize=TRUE,output.dir)
 }
 \arguments{
 \item{spec1, spec2}{character. The names of the sister species whose area of
