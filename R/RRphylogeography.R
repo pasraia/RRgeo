@@ -127,7 +127,7 @@ RRphylogeography<-function(spec1,
     stop("Packages \"ggplot2\" and \"cowplot\" needed for plot=TRUE. Please install them.",
          call. = FALSE)
   }
-
+  if(is.null(output.dir))  stop('argument "output.dir" is missing, with no default')
   RRphylogeo_inner<-function(spec1,
                              spec2,
                              pred,

@@ -137,6 +137,7 @@ eucop_data_preparation<-function (input.dir,
   if (!is.null(bk_points) && any(!misspatstat))
     stop("Packages \"spatstat.geom\" and \"spatstat.explore\" needed to enable bk_points. Please install them.",
          call. = FALSE)
+  if(is.null(output.dir))  stop('argument "output.dir" is missing, with no default')
   biovar <- paste0("bio", c(1, 4:19))
   var_av <- c("LAI", "Megabiome", "NPP",
               paste0("PP", c("","JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG","SEP", "OCT", "NOV", "DEC")),

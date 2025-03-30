@@ -176,6 +176,7 @@ ENphylo_prediction<-function (object,
     }
     ras <- list(call = "enfa_prediction", enfa_prediction = ras)
   }else {
+    if(is.null(output.dir))  stop('argument "output.dir" is missing, with no default')
     message(paste("\n", "PREDICTING ENFA/IMPUTATION", "\n"))
     ras <- pblapply(object, function(ob) {
       if (ob$call == "calibrated_enfa") {

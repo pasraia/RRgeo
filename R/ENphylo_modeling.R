@@ -231,6 +231,8 @@ ENphylo_modeling<-function (input_data,
     stop("all the elements in input_data list must be provided with a species name")
   if (any(!names(input_data) %in% tree$tip.label))
     stop("all species in input_data must be on the phylogenetic tree")
+  if(is.null(output.dir))  stop('argument "output.dir" is missing, with no default')
+
   if(!is.null(swap.args)){
     swargs<-c(nsim=10,si=0.2,si2=0.2)
     if(any(!names(swargs)%in%names(swap.args)))
