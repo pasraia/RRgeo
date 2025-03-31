@@ -46,13 +46,6 @@ Uses the superseded package: 'doSNOW'
 -This note is about the package 'rnaturalearthhires' which is available from  an additional repository as indicated in the DESCRIPTION of the package.
 
 
-* checking for future file timestamps ... NOTE
-unable to verify current time
-
--This is an erratic note impossible to resolve locally.
-
-
-
 ** win-builder (devel and release)
 ** release
 0 errors | 0 warnings | 2 notes

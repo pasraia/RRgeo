@@ -260,7 +260,7 @@ RRphylogeography<-function(spec1,
 
         prova3 <- pblapply(1:length(sp_tot1$cellID),
                            function(x){
-                             pp1 <- suppressWarnings(create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
+                             pp1 <- suppressMessages(create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
                                                cost_distance = TRUE))
                              gd <- st_length(pp1)
                              kk <- data.frame(cellID1 = pp1$fromCell, cellID2 = pp1$toCell,
@@ -291,7 +291,7 @@ RRphylogeography<-function(spec1,
       }else{
         prova3 <- pblapply(1:length(sp_tot1$cellID),
                            function(x){
-                             pp1 <- suppressWarnings(create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
+                             pp1 <- suppressMessages(create_lcp(tr_cor, sp_tot1[x, ], sp_tot2,
                                                cost_distance = TRUE))
                              gd <- st_length(pp1)
                              kk <- data.frame(cellID1 = pp1$fromCell, cellID2 = pp1$toCell,
