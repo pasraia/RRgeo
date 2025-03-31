@@ -113,7 +113,7 @@ getENphylo_results<-function (input.dir,
   all_data <- unlist(all_data, recursive = FALSE)
   if (only_evaluations) {
     all_data <- lapply(all_data, function(x) {
-      data.frame(model_outputs[[1]]$calibrated_model$evaluation)
+      data.frame(x$calibrated_model$evaluation)
     })
   }
   return(all_data)
