@@ -234,7 +234,7 @@ IMPUTED_CALIBRATION<-function(ENFA_output,
           EVAL_ALL <- do.call(rbind, EVAL_ALL)
           return(EVAL_ALL)
         }else {
-          EVAL_ALL <- pblapply(xx$calibrated_model$co,
+          EVAL_ALL <- lapply(xx$calibrated_model$co,
                                function(co) {
                                  U <- co
                                  f1 <- function(y) y %*% U
