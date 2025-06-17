@@ -80,7 +80,7 @@ cal14C(dataset=data,
 }
 }
 \seealso{
-\link[Bchron]{BchronCalibrate}
+Bchron::BchronCalibrate
 }
 \author{
 Alessandro Mondanaro, Silvia Castiglione, Pasquale Raia

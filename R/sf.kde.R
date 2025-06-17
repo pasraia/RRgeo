@@ -1,8 +1,9 @@
 #' @importFrom terra ncol nrow crs global ncell xyFromCell
-#' @importFrom ks hpi Hscv.diag kde
-#' @importFrom sf st_geometry_type
+#' @importFrom ks Hpi Hscv.diag kde
+#' @importFrom sf st_geometry_type st_point
+#' @importFrom stats runif var
 sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardize = FALSE,
-                  scale.factor = NULL, mask = FALSE)
+                      scale.factor = NULL, mask = FALSE)
 {
   if (missing(x))
     stop("x argument must be provided")
@@ -14,11 +15,10 @@ sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardiz
   if (is.null(ref)) {
     if (!is.null(res)) {
       ref <- rast(ext(x), resolution = res)
-    }
-    else {
+    }else {
       ref <- rast(ext(x))
-      message("defaulting to ", res(ref)[1], "x",
-              res(ref)[2], " cell resolution")
+      message("defaulting to ", res(ref)[1], "x", res(ref)[2],
+              " cell resolution")
     }
   }
   if (inherits(ref, "numeric")) {
@@ -26,72 +26,74 @@ sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardiz
       stop("Need xmin, xmax, ymin, ymax bounding coordinates")
     if (!is.null(res)) {
       ref <- rast(ext(ref), resolution = res)
-    }
-    else {
+    }else {
       ref <- rast(ext(ref))
-      message("defaulting to ", res(ref)[1], "x",
-              res(ref)[2], " cell resolution")
+      message("defaulting to ", res(ref)[1], "x", res(ref)[2],
+              " cell resolution")
     }
-  }
-  else {
+  }else {
     if (!inherits(ref, "SpatRaster"))
       stop(deparse(substitute(ref)), " must be a terra SpatRast object")
   }
   n <- c(nrow(ref), ncol(ref))
-  if (is.null(bw)) {
-    if (is.null(y)) {
 
-      if(inherits(try(suppressWarnings(hpi(st_coordinates(x)[,1:2])),
-                      silent=TRUE),"try-error")){
-        bw<-res(ref)[1]
-        message("Using specified bandwidth: ")
 
-      } else {
-        bw = suppressWarnings(hpi(st_coordinates(x)[,
-                                                            1:2]))
-        message("Unweighted automatic bandwidth: ")
-
-      }
-
-    }
-    else {
-
-      if(inherits(try(suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,1:2], y))),
-                      silent=TRUE),"try-error")){
-        bw<-res(ref)[1]
-        message("Using specified bandwidth: ")
-
-      } else {
-        bw = suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,1:2], y)))
-        message("Weighted automatic CV bandwidth: ")
-
-      }
-
+  st_coordinates(x)->coords
+  for (i in 1:2) {
+    if (var(coords[,i])==0){
+      coords[,i] <- coords[,i]+runif(nrow(coords),-eps,eps)
     }
   }
-  else {
-    message("Using specified bandwidth: ")
+  new_geom<-st_sfc(
+    lapply(seq_len(nrow(coords)), function(j) st_point(coords[j,])),
+    crs=st_crs(x))
+  sf::st_geometry(x)<-new_geom
 
+  if (is.null(bw)) {
+    if (is.null(y)) {
+      if (inherits(try(suppressWarnings(Hpi(st_coordinates(x)[,
+                                                              1:2])), silent = TRUE), "try-error")) {
+        bw <-res(ref)[1]
+        eps<-1e-3
+        bw<-diag(bw^2,2)+diag(eps,2)
+        message("Using specified bandwidth: ")
+      }else {
+        bw = suppressWarnings(Hpi(st_coordinates(x)[,
+                                                    1:2]))
+        message("Unweighted automatic bandwidth: ")
+      }
+    }else {
+      if (inherits(try(suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,
+                                                                          1:2], y))), silent = TRUE), "try-error")) {
+        bw <- res(ref)[1]
+        message("Using specified bandwidth: ")
+      }else {
+        bw = suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,
+                                                                1:2], y)))
+        message("Weighted automatic CV bandwidth: ")
+      }
+    }
+  }else {
+    message("Using specified bandwidth: ")
   }
   if (!is.null(y)) {
     message("\n", "calculating weighted kde", "\n")
     kde.est <- suppressWarnings(rast(matrix(kde(st_coordinates(x)[,
-                                                                                 1:2], h = bw, eval.points = xyFromCell(ref,
-                                                                                                                               1:ncell(ref)), gridsize = n, w = y, density = TRUE)$estimate,
-                                                   nrow = n[1], ncol = n[2], byrow = TRUE), extent = ext(ref)))
-  }
-  else {
+                                                                  1:2], h = bw, eval.points = xyFromCell(ref, 1:ncell(ref)),
+                                                gridsize = n, w = y, density = TRUE)$estimate, nrow = n[1],
+                                            ncol = n[2], byrow = TRUE), extent = ext(ref)))
+  }else {
     message("\n", "calculating unweighted kde", "\n")
     kde.est <- suppressWarnings(rast(matrix(kde(st_coordinates(x)[,
-                                                                                 1:2], h = bw, eval.points = xyFromCell(ref,
-                                                                                                                               1:ncell(ref)), gridsize = n, density = TRUE)$estimate,
-                                                   nrow = n[1], ncol = n[2], byrow = TRUE), extent = ext(ref)))
+                                                                  1:2], H = bw, eval.points = xyFromCell(ref, 1:ncell(ref)),
+                                                gridsize = n, density = TRUE)$estimate, nrow = n[1],
+                                            ncol = n[2], byrow = TRUE), extent = ext(ref)))
   }
   if (!is.null(scale.factor))
     kde.est <- kde.est * scale.factor
   if (standardize == TRUE) {
     kde.est <- kde.est/global(kde.est, "max", na.rm = TRUE)[,
-                                                                   1]
+                                                            1]
   }
   if (mask) {
     if (!ref.flag) {

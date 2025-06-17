@@ -1,7 +1,7 @@
 Package: RRgeo
 Type: Package
 Title: Species Distribution Modelling for Rare Species
-Version: 0.0.3
+Version: 0.0.5
 Authors@R: c(person(given = "Alessandro",
                       family = "Mondanaro",
                       role = "aut"),

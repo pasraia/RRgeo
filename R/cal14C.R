@@ -39,7 +39,7 @@
 #'@importFrom parallel clusterEvalQ clusterExport
 #'@importFrom utils data
 #'@export
-#'@seealso \link[Bchron]{BchronCalibrate}
+#'@seealso Bchron::BchronCalibrate
 #'@examples
 #' \donttest{
 #'

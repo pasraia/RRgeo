@@ -4,9 +4,9 @@
 \alias{RRphylogeography}
 \title{Find species area of origin}
 \usage{
-RRphylogeography(spec1,spec2,pred,occs,aggr=NULL,time_col=NULL,
- kde_inversion=FALSE,resistance_map=NULL,th=0.5,clust=0.5,plot=FALSE,
- mask_for_pred=NULL,standardize=TRUE,output.dir)
+RRphylogeography(spec1,spec2,pred,occs,aggr=NULL,time_col=NULL,weights=c(0.5,0.5),
+kde_inversion=FALSE,resistance_map=NULL,th=0.5,clust=0.5,plot=FALSE,
+mask_for_pred=NULL,standardize=TRUE,output.dir)
 }
 \arguments{
 \item{spec1, spec2}{character. The names of the sister species whose area of
@@ -26,13 +26,18 @@ in each direction to be aggregated by averaging cell values (optional).}
 \item{time_col}{character. Name of the \code{occs} column containing the time
 intervals associated to each species occurrence (optional).}
 
+\item{weights}{weights to account for the arithmetic (first value) and
+geometric (second value) means at calculating averaged suitability and
+estimate kernel density (see details).}
+
 \item{kde_inversion}{logical. If \code{TRUE} and \code{time_col} is provided,
 kernel density is estimated by inverting the weights associated to the
 occurrences of the oldest species.}
 
-\item{resistance_map}{a \code{SpatRaster} object to be optionally provided as
-a cost surface map to account for the difficulty of moving in each direction
-across the study area.}
+\item{resistance_map}{an optional \code{SpatRaster} object representing a
+conductance matrix that numerically quantifies the resistance to move across
+a surface (0 indicating maximum resistance, 1 indicating minimum
+resistance).}
 
 \item{th}{numeric. The threshold value to define most suitable cells of the
 species pair as predicted via SDMs.}
@@ -73,7 +78,12 @@ The function integrates phylogenetic and geographical data (i.e.,
  a numeric quantile so that any habitat suitability value greater than 0 that
  exceeds the value is considered to belong to the most suitable cells for the
  species. Conversely, the cells having habitat suitability values lower than
- \code{th} are excluded from distance calculation.
+ \code{th} are excluded from distance calculation. When averaging the habitat
+ suitabilities and kernel densities of target species both the arithmetic
+ mean and the geometric mean are computed. The final combined surfaces are
+ defined as a weighted average of the two means, with weights summing to 1,
+ according to the formula: weights [1]\*arithmetic mean +
+ weights[2]\*geometric mean
 }
 \examples{
 \donttest{
@@ -97,6 +107,7 @@ RRphylogeography(spec1="Ursus_arctos",
                  occs=occs,
                  aggr=5,
                  time_col="TIME_factor",
+                 weights=c(0.5,0.5),
                  kde_inversion=FALSE,
                  resistance_map=NULL,
                  clust=NULL,

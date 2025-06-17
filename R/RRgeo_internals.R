@@ -99,7 +99,10 @@ fix.coastal.points<-function (data,r, ncell, occ.desaggregation){
       final2 <- occ.desaggregation.RASTER(data, xy.cols,r, FALSE)
       final2 <-st_as_sf(final2,coords=xy.cols,crs=crs_data)
       return(final2)
-    }else return(data)
+    }else{
+      data<-st_as_sf(data,coords=xy.cols,crs=crs_data)
+      return(data)
+    }
   }
 }
 
