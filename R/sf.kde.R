@@ -37,7 +37,7 @@ sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardiz
   }
   n <- c(nrow(ref), ncol(ref))
 
-
+  eps<-1e-3
   st_coordinates(x)->coords
   for (i in 1:2) {
     if (var(coords[,i])==0){
@@ -54,7 +54,7 @@ sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardiz
       if (inherits(try(suppressWarnings(Hpi(st_coordinates(x)[,
                                                               1:2])), silent = TRUE), "try-error")) {
         bw <-res(ref)[1]
-        eps<-1e-3
+
         bw<-diag(bw^2,2)+diag(eps,2)
         message("Using specified bandwidth: ")
       }else {
