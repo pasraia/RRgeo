@@ -50,28 +50,20 @@ sf.kde.mod<-function (x, y = NULL, bw = NULL, ref = NULL, res = NULL, standardiz
   sf::st_geometry(x)<-new_geom
 
   if (is.null(bw)) {
-    if (is.null(y)) {
-      if (inherits(try(suppressWarnings(Hpi(st_coordinates(x)[,
-                                                              1:2])), silent = TRUE), "try-error")) {
-        bw <-res(ref)[1]
-
-        bw<-diag(bw^2,2)+diag(eps,2)
-        message("Using specified bandwidth: ")
-      }else {
-        bw = suppressWarnings(Hpi(st_coordinates(x)[,
-                                                    1:2]))
-        message("Unweighted automatic bandwidth: ")
-      }
+    if (inherits(try(suppressWarnings(Hpi(st_coordinates(x)[,
+                                                            1:2])), silent = TRUE), "try-error")) {
+      bw <- min(res(ref))
+      bw <- diag(bw^2, 2) + diag(eps, 2)
+      message("Using automatic bandwidth: ")
     }else {
-      if (inherits(try(suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,
-                                                                          1:2], y))), silent = TRUE), "try-error")) {
-        bw <- res(ref)[1]
-        message("Using specified bandwidth: ")
-      }else {
-        bw = suppressWarnings(Hscv.diag(cbind(st_coordinates(x)[,
-                                                                1:2], y)))
-        message("Weighted automatic CV bandwidth: ")
+      bw = suppressWarnings(Hpi(st_coordinates(x)[,
+                                                  1:2]))
+      res_min <- min(res(ref))
+      if (any(diag(bw)<res_min^2)){
+        bw<-diag(pmax(diag(bw),res_min^2))
       }
+
+      message("Using automatic bandwidth: ")
     }
   }else {
     message("Using specified bandwidth: ")

@@ -131,6 +131,23 @@ RRphylogeography<-function(spec1,
 
   if (is.null(output.dir))
     stop("argument \"output.dir\" is missing, with no default")
+  if(!is.null(mask_for_pred)){
+    if (!all(crs(pred[[1]],proj=TRUE)==crs(mask_for_pred,proj=TRUE),
+             crs(pred[[2]],proj=TRUE)==crs(mask_for_pred,proj=TRUE))) {
+      stop("CRS for the objects pred and mask_for_pred objects do not match.
+         Please ensure all SpatRasters have the same projection and spatial resolution.")
+    }
+  }
+
+  if (!is.null(resistance_map)){
+    if (!all(crs(pred[[1]],proj=TRUE)==crs(resistance_map,proj=TRUE),
+             crs(pred[[2]],proj=TRUE)==crs(resistance_map,proj=TRUE),
+             all(res(pred[[1]])==res(resistance_map)),
+             all(res(pred[[2]])==res(resistance_map)))) {
+      stop("CRS and/or resolution for the objects pred and resistance_map do not match.
+           Please ensure all SpatRasters have the same projection and spatial resolution.")
+    }
+  }
 
   RRphylogeo_inner <- function(spec1, spec2, pred, aggr = NULL,
                                occs, time_col = NULL, kde_inversion = FALSE, resistance_map = NULL,
@@ -144,7 +161,7 @@ RRphylogeography<-function(spec1,
     occs2 <- occs[[which(names(occs) %in% spec2)]]
     mm_mask <- terra::merge(pred1, pred2)
     if (!is.null(aggr))
-      mm_mask <- terra::aggregate(mm_mask, aggr, mean)
+      mm_mask <- terra::aggregate(mm_mask, aggr, mean,na.rm=TRUE)
     suit1 <- resample(pred1, mm_mask, method = "bilinear")
     suit2 <- resample(pred2, mm_mask, method = "bilinear")
     suit1[is.na(mm_mask)] <- NA
@@ -255,26 +272,38 @@ RRphylogeography<-function(spec1,
         })
         prova3 <- pblapply(1:length(sp_tot1$cellID),
                            function(x) {
-                             pp1 <- suppressMessages(create_lcp(tr_cor,
-                                                                sp_tot1[x, ], sp_tot2, cost_distance = TRUE))
-                             gd <- st_length(pp1)
-                             kk <- data.frame(cellID1 = pp1$fromCell,
-                                              cellID2 = pp1$toCell, distance = as.numeric(1/gd),
-                                              cost = pp1$cost)
-                             if (any(is.finite(kk$distance))) {
-                               if (sp_tot1[x, ]$cellID %in% sp_tot2$cellID) {
-                                 q <- which(sp_tot1[x, ]$cellID == sp_tot2$cellID)
-                                 kk[q, ]$distance <- min(kk$distance[is.finite(kk$distance)],
-                                                         na.rm = TRUE)
-                                 kk[q, ]$cost <- min(kk$cost, na.rm = TRUE)
+                             if(all(sp_tot2$cellID%in%sp_tot1[x, ])){
+                               kk <- data.frame(cellID1=sp_tot1[x,]$cellID,
+                                                cellID2=sp_tot2$cellID,
+                                                distance=0,
+                                                cost=1)
+                             } else {
+                               sp_tot2[!sp_tot2$cellID%in%sp_tot1[x, ],]->sp_tot
+                               pp1 <- suppressMessages(create_lcp(tr_cor,
+                                                                  sp_tot1[x, ], sp_tot, cost_distance = TRUE))
+                               gd <- st_length(pp1)
+                               kk <- data.frame(cellID1 = pp1$fromCell,
+                                                cellID2 = pp1$toCell, distance = as.numeric(1/gd),
+                                                cost = pp1$cost)
+                               if (any(is.finite(kk$distance))) {
+                                 if (sp_tot1[x, ]$cellID %in% sp_tot2$cellID) {
+                                   q <- which(sp_tot1[x, ]$cellID == sp_tot2$cellID)
+                                   ss<-data.frame(cellID1=sp_tot1[x, ]$cellID,
+                                                  cellID2=sp_tot2[q, ]$cellID,
+                                                  distance=min(kk$distance[is.finite(kk$distance)],
+                                                               na.rm = TRUE),
+                                                  cost=min(kk$cost, na.rm = TRUE))
+                                   rbind(kk,ss)->kk
+                                 }
+                                 if (sum(kk$distance == "Inf") > 0) {
+                                   l <- which(kk$distance == "Inf")
+                                   kk[l, ]$distance <- max(kk$distance[is.finite(kk$distance)],
+                                                           na.rm = TRUE)
+                                   kk[l, ]$cost <- max(kk$cost, na.rm = TRUE)
+                                 }
                                }
-                               if (sum(kk$distance == "Inf") > 0) {
-                                 l <- which(kk$distance == "Inf")
-                                 kk[l, ]$distance <- max(kk$distance[is.finite(kk$distance)],
-                                                         na.rm = TRUE)
-                                 kk[l, ]$cost <- max(kk$cost, na.rm = TRUE)
-                               }
-                             }else kk <- NULL
+                               else kk <- NULL
+                             }
                              kk
                            }, cl = cl)
         stopCluster(cl)
@@ -283,117 +312,132 @@ RRphylogeography<-function(spec1,
       }else {
         prova3 <- pblapply(1:length(sp_tot1$cellID),
                            function(x) {
-                             pp1 <- suppressMessages(create_lcp(tr_cor,
-                                                                sp_tot1[x, ], sp_tot2, cost_distance = TRUE))
-                             gd <- st_length(pp1)
-                             kk <- data.frame(cellID1 = pp1$fromCell,
-                                              cellID2 = pp1$toCell, distance = as.numeric(1/gd),
-                                              cost = pp1$cost)
-                             if (any(is.finite(kk$distance))) {
-                               if (sp_tot1[x, ]$cellID %in% sp_tot2$cellID) {
-                                 q <- which(sp_tot1[x, ]$cellID == sp_tot2$cellID)
-                                 kk[q, ]$distance <- min(kk$distance[is.finite(kk$distance)],
-                                                         na.rm = TRUE)
-                                 kk[q, ]$cost <- min(kk$cost, na.rm = TRUE)
+                             if(all(sp_tot2$cellID%in%sp_tot1[x, ])){
+                               kk <- data.frame(cellID1=sp_tot1[x,]$cellID,
+                                                cellID2=sp_tot2$cellID,
+                                                distance=0,
+                                                cost=1)
+                             } else {
+                               sp_tot2[!sp_tot2$cellID%in%sp_tot1[x, ],]->sp_tot
+                               pp1 <- suppressMessages(create_lcp(tr_cor,
+                                                                  sp_tot1[x, ], sp_tot, cost_distance = TRUE))
+                               gd <- st_length(pp1)
+                               kk <- data.frame(cellID1 = pp1$fromCell,
+                                                cellID2 = pp1$toCell, distance = as.numeric(1/gd),
+                                                cost = pp1$cost)
+                               if (any(is.finite(kk$distance))) {
+                                 if (sp_tot1[x, ]$cellID %in% sp_tot2$cellID) {
+                                   q <- which(sp_tot1[x, ]$cellID == sp_tot2$cellID)
+                                   ss<-data.frame(cellID1=sp_tot1[x, ]$cellID,
+                                                  cellID2=sp_tot2[q, ]$cellID,
+                                                  distance=min(kk$distance[is.finite(kk$distance)],
+                                                               na.rm = TRUE),
+                                                  cost=min(kk$cost, na.rm = TRUE))
+                                   rbind(kk,ss)->kk
+                                 }
+                                 if (sum(kk$distance == "Inf") > 0) {
+                                   l <- which(kk$distance == "Inf")
+                                   kk[l, ]$distance <- max(kk$distance[is.finite(kk$distance)],
+                                                           na.rm = TRUE)
+                                   kk[l, ]$cost <- max(kk$cost, na.rm = TRUE)
+                                 }
                                }
-                               if (sum(kk$distance == "Inf") > 0) {
-                                 l <- which(kk$distance == "Inf")
-                                 kk[l, ]$distance <- max(kk$distance[is.finite(kk$distance)],
-                                                         na.rm = TRUE)
-                                 kk[l, ]$cost <- max(kk$cost, na.rm = TRUE)
-                               }
-                             }else kk <- NULL
+                               else kk <- NULL
+                             }
                              kk
                            })
       }
-      D_mat <- do.call(rbind, prova3)
-      D_mat$distance[D_mat$distance == 1e-51] <- 0
-      grid1 <- as.data.frame(suit1, xy = TRUE, cells = T)
-      colnames(grid1) <- c("cell", "x", "y", "layer")
-      grid1$layer <- 0
-      agg_sp1 <- stats::aggregate(distance ~ cellID1, FUN = mean,
-                                  data = D_mat)
-      grid1$layer[grid1$cell %in% agg_sp1$cellID1] <- agg_sp1[,
-                                                              2]
-      prova_d1 <- suit1
-      prova_d1[!is.na(prova_d1)] <- grid1$layer
-      grid2 <- as.data.frame(suit2, xy = TRUE, cells = T)
-      colnames(grid2) <- c("cell", "x", "y", "layer")
-      grid2$layer <- 0
-      agg_sp2 <- stats::aggregate(distance ~ cellID2, FUN = mean,
-                                  data = D_mat)
-      grid2$layer[grid2$cell %in% agg_sp2$cellID2] <- agg_sp2[,
-                                                              2]
-      prova_d2 <- suit2
-      prova_d2[!is.na(prova_d2)] <- grid2$layer
-      prova_d1[] <- scales::rescale(values(prova_d1))
-      prova_d2[] <- scales::rescale(values(prova_d2))
-      prova_dist <- mean(prova_d1, prova_d2)
-      RPO_combined = prova_dist * kk * suit
-      RPO_combined_nok = prova_dist * suit
-      RPO_sp1 = suit1_red * k1 * prova_d1
-      RPO_sp1_nok = suit1_red * prova_d1
-      RPO_sp2 = suit2_red * k2 * prova_d2
-      RPO_sp2_nok = suit2_red * prova_d2
-      TOT <- list(RPO_combined, RPO_combined_nok, RPO_sp1,
-                  RPO_sp1_nok, RPO_sp2, RPO_sp2_nok)
-      names(TOT) <- c("RPO_combined", "RPO_combined_nok",
-                      "RPO_sp1", "RPO_sp1_nok", "RPO_sp2", "RPO_sp2_nok")
-      if (standardize) {
-        TOT <- lapply(TOT, function(x) {
-          x1 <- scales::rescale(values(x))
-          x[] <- x1
-          x
-        })
-      }
-      sp1 <- c(suit1_red, k1, prova_d1, TOT$RPO_sp1, TOT$RPO_sp1_nok)
-      sp2 <- c(suit2_red, k2, prova_d2, TOT$RPO_sp2, TOT$RPO_sp2_nok)
-      names(sp1) <- c("Suitability", "Kernel_density",
-                      "Proximity", paste("RPO", spec1, sep = "_"),
-                      paste("RPO", spec1, "nok", sep = "_"))
-      names(sp2) <- c("Suitability", "Kernel_density",
-                      "Proximity", paste("RPO", spec2, sep = "_"),
-                      paste("RPO", spec2, "nok", sep = "_"))
-      combined <- c(TOT$RPO_combined, TOT$RPO_combined_nok)
-      names(combined) <- c("RPO_combined", "RPO_combined_nok")
-      res_tot <- list(name = names(suit1), RPO_sp1 = sp1,
-                      RPO_sp2 = sp2, RPO_combined = combined)
-      names(res_tot)[2:3] <- c(spec1, spec2)
-      if (plot) {
-        pal <- c("white", "#7FCDBB", "#41B6C4", "#2C7FB8",
-                 "#00012E")
-        dp1 <- as.data.frame(res_tot$RPO_combined, xy = TRUE)
-        p1 <- ggplot2::ggplot(co1xx) + ggplot2::geom_sf(colour = "transparent",
-                                                        pch = 21, fill = "transparent", size = 5) +
-          ggplot2::geom_tile(data = dp1, ggplot2::aes(x = dp1$x,
-                                                      y = dp1$y, fill = dp1$RPO_combined)) + ggplot2::scale_fill_gradientn(colours = pal) +
-          ggplot2::theme(panel.background = ggplot2::element_rect(fill = "gray90",
-                                                                  colour = "black"), axis.title = ggplot2::element_blank(),
-                         axis.text = ggplot2::element_text(size = 13),
-                         legend.position = "none")
-        dp2 <- as.data.frame(res_tot$RPO_combined_nok,
-                             xy = TRUE)
-        p2 <- ggplot2::ggplot(co1xx) + ggplot2::geom_sf(colour = "transparent",
-                                                        pch = 21, fill = "transparent", size = 5) +
-          ggplot2::geom_tile(data = dp2, ggplot2::aes(x = dp2$x,
-                                                      y = dp2$y, fill = dp2$RPO_combined_nok)) +
-          ggplot2::scale_fill_gradientn(colours = pal) +
-          ggplot2::theme(panel.background = ggplot2::element_rect(fill = "gray90",
-                                                                  colour = "black"), axis.title = ggplot2::element_blank(),
-                         axis.text = ggplot2::element_text(size = 13),
-                         legend.position = "none")
-        pp <- cowplot::plot_grid(p1, p2, ncol = 2, align = "hv")
-        pp
-      }
-      writeRaster(res_tot[[2]], paste(out.dir, "/", paste(spec1,
-                                                          spec2, sep = "_"), "/", res_tot$name, "_", spec1,
-                                      ".tif", sep = ""), overwrite = TRUE)
-      writeRaster(res_tot[[3]], paste(out.dir, "/", paste(spec1,
-                                                          spec2, sep = "_"), "/", res_tot$name, "_", spec2,
-                                      ".tif", sep = ""), overwrite = TRUE)
-      writeRaster(res_tot[[4]], paste(out.dir, "/", paste(spec1,
-                                                          spec2, sep = "_"), "/", res_tot$name, "_combined.tif",
-                                      sep = ""), overwrite = TRUE)
+
+      if(!all(sapply(prova3,is.null))){
+        D_mat <- do.call(rbind, prova3)
+        D_mat$distance[D_mat$distance == 1e-51] <- 0
+        grid1 <- as.data.frame(suit1, xy = TRUE, cells = T)
+        colnames(grid1) <- c("cell", "x", "y", "layer")
+        grid1$layer <- 0
+        agg_sp1 <- stats::aggregate(distance ~ cellID1, FUN = mean,
+                                    data = D_mat)
+        grid1$layer[grid1$cell %in% agg_sp1$cellID1] <- agg_sp1[,
+                                                                2]
+        prova_d1 <- suit1
+        prova_d1[!is.na(prova_d1)] <- grid1$layer
+        grid2 <- as.data.frame(suit2, xy = TRUE, cells = T)
+        colnames(grid2) <- c("cell", "x", "y", "layer")
+        grid2$layer <- 0
+        agg_sp2 <- stats::aggregate(distance ~ cellID2, FUN = mean,
+                                    data = D_mat)
+        grid2$layer[grid2$cell %in% agg_sp2$cellID2] <- agg_sp2[,
+                                                                2]
+        prova_d2 <- suit2
+        prova_d2[!is.na(prova_d2)] <- grid2$layer
+        prova_d1[] <- scales::rescale(values(prova_d1))
+        prova_d2[] <- scales::rescale(values(prova_d2))
+        prova_dist <- mean(prova_d1, prova_d2)
+        RPO_combined = prova_dist * kk * suit
+        RPO_combined_nok = prova_dist * suit
+        RPO_sp1 = suit1_red * k1 * prova_d1
+        RPO_sp1_nok = suit1_red * prova_d1
+        RPO_sp2 = suit2_red * k2 * prova_d2
+        RPO_sp2_nok = suit2_red * prova_d2
+        TOT <- list(RPO_combined, RPO_combined_nok, RPO_sp1,
+                    RPO_sp1_nok, RPO_sp2, RPO_sp2_nok)
+        names(TOT) <- c("RPO_combined", "RPO_combined_nok",
+                        "RPO_sp1", "RPO_sp1_nok", "RPO_sp2", "RPO_sp2_nok")
+        if (standardize) {
+          TOT <- lapply(TOT, function(x) {
+            x1 <- scales::rescale(values(x))
+            x[] <- x1
+            x
+          })
+        }
+        sp1 <- c(suit1_red, k1, prova_d1, TOT$RPO_sp1, TOT$RPO_sp1_nok)
+        sp2 <- c(suit2_red, k2, prova_d2, TOT$RPO_sp2, TOT$RPO_sp2_nok)
+        names(sp1) <- c("Suitability", "Kernel_density",
+                        "Proximity", paste("RPO", spec1, sep = "_"),
+                        paste("RPO", spec1, "nok", sep = "_"))
+        names(sp2) <- c("Suitability", "Kernel_density",
+                        "Proximity", paste("RPO", spec2, sep = "_"),
+                        paste("RPO", spec2, "nok", sep = "_"))
+        combined <- c(TOT$RPO_combined, TOT$RPO_combined_nok)
+        names(combined) <- c("RPO_combined", "RPO_combined_nok")
+        res_tot <- list(name = names(suit1), RPO_sp1 = sp1,
+                        RPO_sp2 = sp2, RPO_combined = combined)
+        names(res_tot)[2:3] <- c(spec1, spec2)
+        if (plot) {
+          pal <- c("white", "#7FCDBB", "#41B6C4", "#2C7FB8",
+                   "#00012E")
+          dp1 <- as.data.frame(res_tot$RPO_combined, xy = TRUE)
+          p1 <- ggplot2::ggplot(co1xx) + ggplot2::geom_sf(colour = "transparent",
+                                                          pch = 21, fill = "transparent", size = 5) +
+            ggplot2::geom_tile(data = dp1, ggplot2::aes(x = dp1$x,
+                                                        y = dp1$y, fill = dp1$RPO_combined)) + ggplot2::scale_fill_gradientn(colours = pal) +
+            ggplot2::theme(panel.background = ggplot2::element_rect(fill = "gray90",
+                                                                    colour = "black"), axis.title = ggplot2::element_blank(),
+                           axis.text = ggplot2::element_text(size = 13),
+                           legend.position = "none")
+          dp2 <- as.data.frame(res_tot$RPO_combined_nok,
+                               xy = TRUE)
+          p2 <- ggplot2::ggplot(co1xx) + ggplot2::geom_sf(colour = "transparent",
+                                                          pch = 21, fill = "transparent", size = 5) +
+            ggplot2::geom_tile(data = dp2, ggplot2::aes(x = dp2$x,
+                                                        y = dp2$y, fill = dp2$RPO_combined_nok)) +
+            ggplot2::scale_fill_gradientn(colours = pal) +
+            ggplot2::theme(panel.background = ggplot2::element_rect(fill = "gray90",
+                                                                    colour = "black"), axis.title = ggplot2::element_blank(),
+                           axis.text = ggplot2::element_text(size = 13),
+                           legend.position = "none")
+          pp <- cowplot::plot_grid(p1, p2, ncol = 2, align = "hv")
+          pp
+        }
+        writeRaster(res_tot[[2]], paste(out.dir, "/", paste(spec1,
+                                                            spec2, sep = "_"), "/", res_tot$name, "_", spec1,
+                                        ".tif", sep = ""), overwrite = TRUE)
+        writeRaster(res_tot[[3]], paste(out.dir, "/", paste(spec1,
+                                                            spec2, sep = "_"), "/", res_tot$name, "_", spec2,
+                                        ".tif", sep = ""), overwrite = TRUE)
+        writeRaster(res_tot[[4]], paste(out.dir, "/", paste(spec1,
+                                                            spec2, sep = "_"), "/", res_tot$name, "_combined.tif",
+                                        sep = ""), overwrite = TRUE)
+      }else res_tot <- NULL
     } else res_tot <- NULL
     return(res_tot)
   }
