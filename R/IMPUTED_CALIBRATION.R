@@ -178,15 +178,27 @@ IMPUTED_CALIBRATION<-function(ENFA_output,
                                                    train$globalID), ]
               PRED_sites_test <- ras_back[which(ras_back$globalID %in%
                                                   test$globalID), ]
-              a <- ras_back
-              if (nrow(a) > 10000) {
-                k <- sample(1:nrow(a), 10000)
-                a <- a[k, ]
-              }else k <- 1:nrow(a)
+
+              pres_ids<-unique(c(train$globalID,test$globalID))
+              pres_idx<-which(ras_back$globalID%in%pres_ids)
+              bg_idx<-which(!(ras_back$globalID%in%pres_ids))
+
+              if (length(bg_idx)>10000)
+                bg_idx_sub<-sample(bg_idx,10000) else
+                  bg_idx_sub<-bg_idx
+
+              sel<-sort(c(pres_idx, bg_idx_sub))
+              ras_back<-ras_back[sel,,drop=FALSE]
+              gg<-gg[sel,,drop=FALSE]
+
+              k <- which(!(ras_back$globalID%in%pres_ids))
+
               a_scaled <- dudi.pca(gg, scannf = FALSE)$tab
               a_scaled$globalID <- ras_back$globalID
               p_scaled <- a_scaled[which(a_scaled$globalID %in%
                                            PRED_sites_train$globalID), ]
+              if (nrow(p_scaled)<=ncol(gg)) gg<-gg[,1:(nrow(p_scaled)-1),drop=FALSE]
+
               maha_prob <- mahasuhab.custom(a_scaled[,
                                                      1:ncol(gg)], p_scaled[, 1:ncol(gg)])
               maha_prob$globalID <- ras_back$globalID
@@ -271,15 +283,25 @@ IMPUTED_CALIBRATION<-function(ENFA_output,
                                                                         train$globalID), ]
                                    PRED_sites_test <- ras_back[which(ras_back$globalID %in%
                                                                        test$globalID), ]
-                                   a <- ras_back
-                                   if (nrow(a) > 10000) {
-                                     k <- sample(1:nrow(a), 10000)
-                                     a <- a[k, ]
-                                   }else k <- 1:nrow(a)
+                                   pres_ids<-unique(c(train$globalID,test$globalID))
+                                   pres_idx<-which(ras_back$globalID%in%pres_ids)
+                                   bg_idx<-which(!(ras_back$globalID%in%pres_ids))
+
+                                   if (length(bg_idx)>10000)
+                                     bg_idx_sub<-sample(bg_idx,10000) else
+                                     bg_idx_sub<-bg_idx
+
+                                   sel<-sort(c(pres_idx, bg_idx_sub))
+                                   ras_back<-ras_back[sel,,drop=FALSE]
+                                   gg<-gg[sel,,drop=FALSE]
+
+                                   k <- which(!(ras_back$globalID%in%pres_ids))
+
                                    a_scaled <- dudi.pca(gg, scannf = FALSE)$tab
                                    a_scaled$globalID <- ras_back$globalID
                                    p_scaled <- a_scaled[which(a_scaled$globalID %in%
                                                                 PRED_sites_train$globalID), ]
+                                   if (nrow(p_scaled)<=ncol(gg)) gg<-gg[,1:(nrow(p_scaled)-1),drop=FALSE]
                                    maha_prob <- mahasuhab.custom(a_scaled[,
                                                                           1:ncol(gg)], p_scaled[, 1:ncol(gg)])
                                    maha_prob$globalID <- ras_back$globalID

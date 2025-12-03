@@ -1,6 +1,6 @@
 ## Test environments
 * Mac OS 15.3.1, R 4.4.1
-* Windows 10 Pro, R 4.4.1
+* Windows 10 Pro, R 4.5.2
 * win-builder (devel and release)
 
 ## R CMD check results
@@ -29,71 +29,29 @@ unable to verify current time
 
 
 
-** Windows 10 Pro, R 4.4.1
+** Windows 11 Pro, R 4.5.2
 0 errors | 0 warnings | 2 notes
-* checking CRAN incoming feasibility ... [16s] NOTE
+* checking CRAN incoming feasibility ... [10s] INFO
 Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
-
-New submission
 
 Suggests or Enhances not in mainstream repositories:
   rnaturalearthhires
 Availability using Additional_repositories specification:
   rnaturalearthhires   yes   http://packages.ropensci.org
 
-Uses the superseded package: 'doSNOW'
-
 -This note is about the package 'rnaturalearthhires' which is available from  an additional repository as indicated in the DESCRIPTION of the package.
+
+
+* checking for future file timestamps ... NOTE
+unable to verify current time
+
+-This is an erratic note impossible to resolve locally.
 
 
 ** win-builder (devel and release)
 ** release
-0 errors | 0 warnings | 2 notes
-* checking CRAN incoming feasibility ... [10s] NOTE
-Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
+0 errors | 0 warnings | 0 notes
 
-New submission
-
-Possibly misspelled words in DESCRIPTION:
-  Mondanaro (27:83, 27:180)
-  al (27:96, 27:193)
-  et (27:93, 27:190)
-
-- The words are all correctly spelled
-
-Suggests or Enhances not in mainstream repositories:
-  rnaturalearthhires
-Availability using Additional_repositories specification:
-  rnaturalearthhires   yes   http://packages.ropensci.org
-
-Uses the superseded package: 'doSNOW'
-
-* checking package dependencies ... NOTE
-Package suggested but not available for checking: 'rnaturalearthhires'
-
--These notes are both about the package 'rnaturalearthhires' which is available from an additional repository as indicated in the DESCRIPTION of the package.
-
-
-** devel
-0 errors | 0 warnings | 1 note
-* checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Silvia Castiglione <silvia.castiglione@unina.it>'
-
-New submission
-
-Possibly misspelled words in DESCRIPTION:
-  Mondanaro (27:83, 27:180)
-  al (27:96, 27:193)
-  et (27:93, 27:190)
-  
-- The words are all correctly spelled
-
-Suggests or Enhances not in mainstream repositories:
-  rnaturalearthhires
-Availability using Additional_repositories specification:
-  rnaturalearthhires   yes   http://packages.ropensci.org
-  
--This note is about the package 'rnaturalearthhires' which is available from  an additional repository as indicated in the DESCRIPTION of the package.
 
 ## Reverse dependencies
 
