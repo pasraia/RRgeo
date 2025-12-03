@@ -35,7 +35,6 @@ Imports: ape, methods,pbapply,Rphylopars,RRphylo,dismo (>= 1.3),gtools, terra,
 Suggests: ggplot2, cowplot, openxlsx, Bchron, curl, rnaturalearth (>= 1.0.1), rnaturalearthhires,
           spatstat.geom, spatstat.explore, knitr, httr, jsonlite
 Config/Needs/check: ropensci/rnaturalearthhires
-Remotes: ropensci/rnaturalearthhires
 Additional_repositories: http://packages.ropensci.org
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
