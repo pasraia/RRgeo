@@ -30,9 +30,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.6.0)
 Imports: ape, methods,pbapply,Rphylopars,RRphylo,dismo (>= 1.3),gtools, terra, adehabitatMA, ecospat (>= 3.2.1), foreach, doParallel, PresenceAbsence, parallel, ade4, sp, sf,scales, ks, leastcostpath, doSNOW, biomod2 (>= 4.2),utils
-Suggests: ggplot2, cowplot, openxlsx, Bchron, curl, rnaturalearth (>= 1.0.1), rnaturalearthhires,
+Suggests: ggplot2, cowplot, openxlsx, Bchron, curl, rnaturalearth (>= 1.0.1),
           spatstat.geom, spatstat.explore, knitr, httr, jsonlite
-Remotes: ropensci/rnaturalearthhires
-Additional_repositories: http://packages.ropensci.org
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
