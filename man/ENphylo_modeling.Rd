@@ -186,7 +186,7 @@ ENphylo
  \code{eval_metric_for_imputation} set to run the of ENphylo model.}
 }
 \examples{
-\donttest{
+\dontrun{
 library(ape)
 library(terra)
 library(sf)

@@ -57,7 +57,7 @@ If \code{dataset} includes marine samples, the user should indicate
  related radiocarbon ages accordingly.
 }
 \examples{
-\donttest{
+\dontrun{
 
 library(RRgeo)
 

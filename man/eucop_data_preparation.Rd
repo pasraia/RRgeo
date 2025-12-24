@@ -95,7 +95,7 @@ Additionally, if \code{bk_points} is not \code{NULL}, the ages of
  paleoclimatic/vegetational or bioclimatic data.
 }
 \examples{
-\donttest{
+\dontrun{
 
 newwd<-tempdir()
 # newwd<-"YOUR_DIRECTORY"

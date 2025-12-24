@@ -60,7 +60,7 @@ If \code{convert.to.suitability} is set as \code{TRUE},
  Moisen, 2008}).
 }
 \examples{
-\donttest{
+\dontrun{
 library(ape)
 library(terra)
 library(sf)

@@ -86,7 +86,7 @@ The function integrates phylogenetic and geographical data (i.e.,
  weights[2]\*geometric mean
 }
 \examples{
-\donttest{
+\dontrun{
 
 library(RRgeo)
 library(terra)
