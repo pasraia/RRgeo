@@ -64,7 +64,7 @@ Suggests: ggplot2,
   knitr,
   httr,
   jsonlite
-Config/Needs/check: ropensci/rnaturalearthhires
+Remotes: ropensci/rnaturalearthhires
 Additional_repositories: https://ropensci.r-universe.dev
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
