@@ -41,7 +41,7 @@
 #'@export
 #'@seealso Bchron::BchronCalibrate
 #'@examples
-#' \donttest{
+#' \dontrun{
 #'
 #' library(RRgeo)
 #'

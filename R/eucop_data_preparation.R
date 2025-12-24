@@ -89,7 +89,7 @@
 #'  climate database for conservation paleobiology based on eutherian mammals.
 #'  \emph{Scientific Data}, 12: 6. doi:10.1038/s41597-024-04181-4.
 #'@examples
-#' \donttest{
+#' \dontrun{
 #'
 #' newwd<-tempdir()
 #' # newwd<-"YOUR_DIRECTORY"

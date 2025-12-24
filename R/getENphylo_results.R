@@ -22,7 +22,7 @@
 #'@export
 #'@seealso \link{ENphylo_modeling}; \href{../doc/ENphylo.html}{\code{getENphylo_results} vignette}
 #'@examples
-#'\donttest{
+#'\dontrun{
 #' library(ape)
 #' library(terra)
 #' library(sf)

@@ -74,7 +74,7 @@
 #'  history of past contacts between species. \emph{Methods in Ecology and
 #'  Evolution}, 16: 546-557. 10.1111/2041-210X.14478
 #'@examples
-#' \donttest{
+#' \dontrun{
 #'
 #' library(RRgeo)
 #' library(terra)

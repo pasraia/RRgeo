@@ -63,7 +63,7 @@
 #'  method to model the distribution of extremely rare species. \emph{Methods in
 #'  Ecology and Evolution}, 14: 911-922. doi:10.1111/2041-210X.14066
 #'@examples
-#' \donttest{
+#' \dontrun{
 #' library(ape)
 #' library(terra)
 #' library(sf)
