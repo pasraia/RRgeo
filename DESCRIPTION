@@ -2,28 +2,7 @@ Package: RRgeo
 Type: Package
 Title: Species Distribution Modelling for Rare Species
 Version: 0.0.6
-Authors@R: c(person(given = "Alessandro",
-                      family = "Mondanaro",
-                      role = "aut"),
-               person(given = c("Mirko", "Di"),
-                      family = "Febbraro",
-                      role = "aut"),
-               person(given = "Silvia",
-                      family = "Castiglione",
-                      role = c("aut","cre"),
-                      email = "silvia.castiglione@unina.it"),
-               person(given = "Carmela",
-                      family = "Serio",
-                      role = "aut"),
-               person(given = "Marina",
-                      family = "Melchionna",
-                      role = "aut"),
-               person(given = "Giorgia",
-                      family = "Girardi",
-                      role = "aut"),
-               person(given = "Pasquale",
-                      family = "Raia",
-                      role = "aut"))
+Authors@R: c(person(given = "Alessandro",family = "Mondanaro",role = "aut"),person(given = c("Mirko", "Di"),family = "Febbraro",role = "aut"),person(given = "Silvia",family = "Castiglione",role = c("aut","cre"),email = "silvia.castiglione@unina.it"),person(given = "Carmela",family = "Serio",role = "aut"),person(given = "Marina",family = "Melchionna",role = "aut"),person(given = "Giorgia",family = "Girardi",role = "aut"),person(given = "Pasquale",family = "Raia",role = "aut"))
 Description: Performs species distribution modeling for rare species with unprecedented accuracy (Mondanaro et al., 2023 <doi:10.1111/2041-210X.14066>) and finds the area of origin of species and past contact between them taking climatic variability in full consideration (Mondanaro et al., 2025 <doi:10.1111/2041-210X.14478>).
 License: GPL-2
 Encoding: UTF-8
