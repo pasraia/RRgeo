@@ -65,6 +65,7 @@ Package suggested but not available for checking: 'rnaturalearthhires'
           Ubuntu 24.04.3 LTS (-next and -release)
 0 errors | 0 warnings | 0 notes 
 
+
 ## Reverse dependencies
 
 The package has no reverse dependency.
