@@ -2,6 +2,10 @@
 * Mac OS Tahoe 26.1, R 4.5.2
 * Windows 10 Pro, R 4.5.2
 * win-builder (devel and release)
+* R-hub: ubuntu-latest, macos-latest, windows-latest on GitHub; 
+  macos-15 on GitHub, ASAN + UBSAN on macOS;
+  Ubuntu 24.04.3 LTS (-next and -release)
+  
 
 ## R CMD check results
 
@@ -54,6 +58,19 @@ Availability using Additional_repositories specification:
 Package suggested but not available for checking: 'rnaturalearthhires'
 
 -This infos are about the package 'rnaturalearthhires' which is available from  an additional repository as indicated in the DESCRIPTION of the package.
+
+
+**  R-hub
+** ubuntu-latest, macos-latest, windows-latest on GitHub; macos-15 on GitHub, ASAN + UBSAN on macOS
+0 errors | 0 warnings | 0 notes | 1 info
+
+* checking Rd cross-references ... INFO
+Package unavailable to check Rd xrefs: ‘adehabitatHS’
+
+-
+
+** Ubuntu 24.04.3 LTS (-next and -release)
+0 errors | 0 warnings | 0 notes
 
 
 ## Reverse dependencies
