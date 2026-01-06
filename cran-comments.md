@@ -60,10 +60,12 @@ Package suggested but not available for checking: 'rnaturalearthhires'
 -This infos are about the package 'rnaturalearthhires' which is available from  an additional repository as indicated in the DESCRIPTION of the package.
 
 
+<<<<<<< HEAD
 **  R-hub: ubuntu-latest, macos-latest, windows-latest on GitHub; 
           macos-15 on GitHub, ASAN + UBSAN on macOS; 
           Ubuntu 24.04.3 LTS (-next and -release)
 0 errors | 0 warnings | 0 notes 
+>>>>>>> 03147150c756af1716cd4adaf10b0e3b7e370f9f
 
 ## Reverse dependencies
 
