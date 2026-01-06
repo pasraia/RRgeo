@@ -33,8 +33,8 @@ Imports: ape, methods, pbapply, Rphylopars, RRphylo, dismo (>= 1.3), gtools, ter
          ecospat (>= 3.2.1), foreach, doParallel, PresenceAbsence, parallel, ade4, sp, sf, scales, 
          ks, leastcostpath, doSNOW, biomod2 (>= 4.2), utils
 Suggests: ggplot2, cowplot, openxlsx, Bchron, curl, rnaturalearth (>= 1.0.1), rnaturalearthhires,
-          spatstat.geom, spatstat.explore, knitr, httr, jsonlite
-Remotes: ropensci/rnaturalearthhires
+          spatstat.geom, spatstat.explore, knitr, httr, jsonlite, adehabitatHS
+Config/Needs/check: ropensci/rnaturalearthhires
 Additional_repositories: https://ropensci.r-universe.dev
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
