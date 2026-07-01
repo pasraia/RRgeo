@@ -253,7 +253,8 @@ eucop_data_preparation<-function (input.dir,
 
   dd <- occs_foss[match(ages$locality, occs_foss$locality),
   ]
-  dd <- dd[-which(is.na(dd$locality)), ]
+  # dd <- dd[-which(is.na(dd$locality)), ]
+  dd <- dd[!is.na(dd$locality), , drop = FALSE]
   datt <- ages[ages$locality %in% dd$locality, ]
   dat <- cbind(datt, longitude = dd$longitude, latitude = dd$latitude)
   dat$age <- as.numeric(dat$age)
@@ -307,9 +308,11 @@ eucop_data_preparation<-function (input.dir,
                                  "min.age", "max.age")]
   if (add.modern.occs) {
     occs_curr <- occs[occs$status == "current", ]
-    if (species_name %in% unique(occs_curr$species)) {
-      occs_curr <- occs_curr[which(occs_curr$species ==
-                                     species_name), ]
+    # if (species_name %in% unique(occs_curr$species)) {
+    if (any(species_name %in% unique(occs_curr$species))) {
+      # occs_curr <- occs_curr[which(occs_curr$species ==
+      #                                species_name), ]
+      occs_curr <- occs_curr[which(occs_curr$species%in%species_name), ]
       occs_curr$mean.age <- rep(0, nrow(occs_curr))
       occs_curr$min.age <- rep(0, nrow(occs_curr))
       occs_curr$max.age <- rep(0, nrow(occs_curr))
@@ -365,8 +368,10 @@ eucop_data_preparation<-function (input.dir,
         mm <- vars[which(names(vars) %in% unique(jjj2$time))]
         mm <- sum(rast(lapply(mm, "[[", 1)), na.rm = TRUE)
         project(mm,st_crs(pol)$proj4string,res=50000)->mm
+        mm->new.mm
         mm <- mask(crop(mm, vect(pol)), vect(pol))
-        dens <- density_background(jjj2, MASK = mm,rm.pres=TRUE)
+        dens <- density_background(jjj2, MASK = mm,area_tot=new.mm,
+                                   curr_buf=buf,curr_pol=pol,rm.pres=TRUE)
       }
       ll <- split(jjj2, jjj2$time)
       rescale <- function(x, somma) {

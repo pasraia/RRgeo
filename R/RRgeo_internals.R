@@ -106,14 +106,18 @@ fix.coastal.points<-function (data,r, ncell, occ.desaggregation){
   }
 }
 
-density_background<-function(pres.locs, MASK, rm.pres=TRUE) {
+density_background <- function(pres.locs,
+                               MASK,
+                               area_tot = NULL,
+                               curr_pol = NULL,
+                               curr_buf = NULL,
+                               rm.pres = TRUE){
+
   test <- as.polygons(MASK)
   test1 <- st_as_sf(test)
   test2 <- spatstat.geom::as.owin(st_bbox(test1))
   ppp <- spatstat.geom::ppp(st_coordinates(pres.locs)[, 1],
-                            st_coordinates(pres.locs)[, 2],
-                            window = test2,
-                            checkdup=FALSE)
+                            st_coordinates(pres.locs)[, 2], window = test2, checkdup = FALSE)
   dens <- spatstat.explore::density.ppp(ppp, dimyx = c(nrow(MASK),
                                                        ncol(MASK)))
   mm1 <- MASK
@@ -121,7 +125,48 @@ density_background<-function(pres.locs, MASK, rm.pres=TRUE) {
   dens.ras <- resample(rast(dens), mm1)
   dens.ras <- dens.ras * mm1
   dens.ras[] <- scales::rescale(values(dens.ras))
-  if (rm.pres) dens.ras <- mask(dens.ras, pres.locs, inverse = TRUE)
+  if (rm.pres)
+    dens.ras <- mask(dens.ras, pres.locs, inverse = TRUE)
+
+  n_avail <- sum(!is.na(values(dens.ras)))
+  if (rm.pres && n_avail <  nrow(pres.locs)) {
+
+    warning("Not enough background cells available in the study area.
+            Trying to extend the chosen area...",immediate.=TRUE)
+
+    as.numeric(curr_buf)*c(2,4,6,8,10)->buffer_steps
+    succeeded <- FALSE
+    for (d in buffer_steps) {
+      new_pol <- st_buffer(curr_pol, dist = d)
+      MASK2 <- mask(crop(area_tot, vect(new_pol)), vect(new_pol))
+      test <- as.polygons(MASK2)
+      test1 <- st_as_sf(test)
+      test2 <- spatstat.geom::as.owin(st_bbox(test1))
+      ppp <- spatstat.geom::ppp(st_coordinates(pres.locs)[, 1],
+                                st_coordinates(pres.locs)[, 2], window = test2, checkdup = FALSE)
+      dens2 <- spatstat.explore::density.ppp(ppp, dimyx = c(nrow(MASK2),
+                                                            ncol(MASK2)))
+      mm2 <- MASK2
+      mm2[!is.na(mm2)] <- 1
+      dens.ras2 <- resample(rast(dens2), mm2)
+      dens.ras2 <- dens.ras2 * mm2
+      dens.ras2[] <- scales::rescale(values(dens.ras2))
+      dens.ras2 <- mask(dens.ras2, vect(pres.locs), inverse = TRUE)
+
+      n_try <- sum(!is.na(values(dens.ras2)))
+      if (n_try >= nrow(pres.locs)) {
+        dens.ras <- dens.ras2
+        message("Buffer expansion succeeded at dist=", d)
+        succeeded <- TRUE
+        break
+      }
+    }
+
+    if (!succeeded) {
+      stop("Not enough background cells even after area expansion.")
+    }
+  }
+
   return(dens.ras)
 }
 

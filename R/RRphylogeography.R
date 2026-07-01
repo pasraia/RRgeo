@@ -46,8 +46,8 @@
 #'  creates a new folder to store the outputs. This new folder is renamed by
 #'  concatenating the names of the species pair.
 #'@importFrom terra resample values merge mean
-#'@importFrom sf st_as_sf st_length
-#'@importFrom leastcostpath create_cs force_isotropy create_lcp
+#'@importFrom sf st_as_sf st_length st_linestring
+#'@importFrom leastcostpath create_cs force_isotropy
 #'@importFrom doSNOW registerDoSNOW
 #'@importFrom utils txtProgressBar setTxtProgressBar
 #'@author Alessandro Mondanaro, Mirko Di Febbraro, Silvia Castiglione, Carmela
@@ -65,7 +65,7 @@
 #'  weights[2]\*geometric mean
 #'@seealso  \href{../doc/RRphylogeo.html}{\code{RRphylogeography} vignette}
 #'@return A list of \code{SpatRaster} objects which includes the area of the
-#'  origin (RPO) and both relative probability (RPO) maps for the species pair
+#'  origin (AOO) and both relative probability (RPO) maps for the species pair
 #'  calculated for each layer in the prediction maps.
 #'@export
 #'@references Mondanaro, A., Castiglione, S., Di Febbraro, M., Timmermann, A.,
@@ -124,8 +124,9 @@ RRphylogeography<-function(spec1,
                            standardize=TRUE,
                            output.dir){
   if (plot && (!requireNamespace("ggplot2", quietly = TRUE) |
-               !requireNamespace("cowplot", quietly = TRUE))) {
-    stop("Packages \"ggplot2\" and \"cowplot\" needed for plot=TRUE. Please install them.",
+               !requireNamespace("cowplot", quietly = TRUE)|
+               !requireNamespace("igraph", quietly = TRUE))) {
+    stop("Packages \"igraph\", \"ggplot2\" and \"cowplot\" needed for plot=TRUE. Please install them.",
          call. = FALSE)
   }
 
@@ -262,6 +263,14 @@ RRphylogeography<-function(spec1,
         tr_cor <- create_cs(mm_mask, 4)
         tr_cor <- force_isotropy(tr_cor)
       }
+      cs_rast <- rast(nrow = tr_cor$nrow, ncol = tr_cor$ncol,
+                      xmin = tr_cor$extent[1], xmax = tr_cor$extent[2],
+                      ymin = tr_cor$extent[3], ymax = tr_cor$extent[4],
+                      crs  = tr_cor$crs)
+      cm_graph <- igraph::graph_from_adjacency_matrix(
+        tr_cor$conductanceMatrix, mode = "directed", weighted = TRUE
+      )
+      igraph::E(cm_graph)$weight <- 1 / igraph::E(cm_graph)$weight
 
       if (!is.null(clust)) {
         cl <- makeCluster(detectCores() * clust)
@@ -278,13 +287,45 @@ RRphylogeography<-function(spec1,
                                                 distance=0,
                                                 cost=1)
                              } else {
-                               sp_tot2[!sp_tot2$cellID%in%sp_tot1[x, ],]->sp_tot
-                               pp1 <- suppressMessages(create_lcp(tr_cor,
-                                                                  sp_tot1[x, ], sp_tot, cost_distance = TRUE))
-                               gd <- st_length(pp1)
-                               kk <- data.frame(cellID1 = pp1$fromCell,
-                                                cellID2 = pp1$toCell, distance = as.numeric(1/gd),
-                                                cost = pp1$cost)
+                               # NUOVA VERSIONE 23-01 ----------------------------------------------------
+                               to_cell <- sp_tot2$cellID[sp_tot2$cellID != sp_tot1[x, ]$cellID]
+                               from_cell <- sp_tot1[x, ]$cellID
+
+                               sp <-  suppressMessages(igraph::shortest_paths(
+                                 cm_graph, from = from_cell, to = to_cell,
+                                 mode = "out", algorithm = "dijkstra"
+                               ))
+
+                               cost_vec <- as.numeric(igraph::distances(
+                                 cm_graph, v = from_cell, to = to_cell,
+                                 mode = "out", algorithm = "dijkstra"
+                               ))
+
+                               lcps_geom <- lapply(sp$vpath, function(v) {
+                                 v <- as.integer(v)
+                                 if (length(v)<= 1) {
+                                   cell<-if(length(v)==0) from_cell else v[1]
+                                   xy<-xyFromCell(cs_rast, cell)
+                                   return(st_linestring(rbind(xy, xy)))
+                                 }
+                                 xy<-xyFromCell(cs_rast,v)
+                                 st_linestring(xy)
+                               })
+
+                               lcps_sfc<-st_sfc(lcps_geom,crs=crs(cs_rast))
+                               gd_vec<-as.numeric(st_length(lcps_sfc))
+
+                               kk <- data.frame(cellID1 = from_cell,
+                                                cellID2 = to_cell, distance = as.numeric(1/gd_vec),
+                                                cost = cost_vec)
+                               # FINE NUOVA VERSIONE 23-01 -----------------------------------------------
+                               # sp_tot2[!sp_tot2$cellID%in%sp_tot1[x, ],]->sp_tot
+                               # pp1 <- suppressMessages(create_lcp(tr_cor,
+                               #                                    sp_tot1[x, ], sp_tot, cost_distance = TRUE))
+                               # gd <- st_length(pp1)
+                               # kk <- data.frame(cellID1 = pp1$fromCell,
+                               #                  cellID2 = pp1$toCell, distance = as.numeric(1/gd),
+                               #                  cost = pp1$cost)
                                if (any(is.finite(kk$distance))) {
                                  if (sp_tot1[x, ]$cellID %in% sp_tot2$cellID) {
                                    q <- which(sp_tot1[x, ]$cellID == sp_tot2$cellID)
@@ -318,13 +359,46 @@ RRphylogeography<-function(spec1,
                                                 distance=0,
                                                 cost=1)
                              } else {
-                               sp_tot2[!sp_tot2$cellID%in%sp_tot1[x, ],]->sp_tot
-                               pp1 <- suppressMessages(create_lcp(tr_cor,
-                                                                  sp_tot1[x, ], sp_tot, cost_distance = TRUE))
-                               gd <- st_length(pp1)
-                               kk <- data.frame(cellID1 = pp1$fromCell,
-                                                cellID2 = pp1$toCell, distance = as.numeric(1/gd),
-                                                cost = pp1$cost)
+                               # NUOVA VERSIONE 23-01 ----------------------------------------------------
+                               to_cell <- sp_tot2$cellID[sp_tot2$cellID != sp_tot1[x, ]$cellID]
+                               from_cell <- sp_tot1[x, ]$cellID
+
+                               sp <-  suppressMessages(igraph::shortest_paths(
+                                 cm_graph, from = from_cell, to = to_cell,
+                                 mode = "out", algorithm = "dijkstra"
+                               ))
+
+                               cost_vec <- as.numeric(igraph::distances(
+                                 cm_graph, v = from_cell, to = to_cell,
+                                 mode = "out", algorithm = "dijkstra"
+                               ))
+
+                               lcps_geom <- lapply(sp$vpath, function(v) {
+                                 v <- as.integer(v)
+                                 if (length(v)<= 1) {
+                                   cell<-if(length(v)==0) from_cell else v[1]
+                                   xy<-xyFromCell(cs_rast, cell)
+                                   return(st_linestring(rbind(xy, xy)))
+                                 }
+                                 xy<-xyFromCell(cs_rast,v)
+                                 st_linestring(xy)
+                               })
+
+                               lcps_sfc<-st_sfc(lcps_geom,crs=crs(cs_rast))
+                               gd_vec<-as.numeric(st_length(lcps_sfc))
+
+                               kk <- data.frame(cellID1 = from_cell,
+                                                cellID2 = to_cell, distance = as.numeric(1/gd_vec),
+                                                cost = cost_vec)
+
+                               # FINE NUOVA VERSIONE 23-01 ------------------------------------------
+                               # sp_tot2[!sp_tot2$cellID%in%sp_tot1[x, ],]->sp_tot
+                               # pp1 <- suppressMessages(create_lcp(tr_cor,
+                               #                                    sp_tot1[x, ], sp_tot, cost_distance = TRUE))
+                               # gd <- st_length(pp1)
+                               # kk <- data.frame(cellID1 = pp1$fromCell,
+                               #                  cellID2 = pp1$toCell, distance = as.numeric(1/gd),
+                               #                  cost = pp1$cost)
                                if (any(is.finite(kk$distance))) {
                                  if (sp_tot1[x, ]$cellID %in% sp_tot2$cellID) {
                                    q <- which(sp_tot1[x, ]$cellID == sp_tot2$cellID)
